@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
+
 class ASTNode(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor) -> None:
@@ -65,6 +66,22 @@ class Declarations(ASTNode):
 
     def accept(self, visitor: Visitor):
         visitor.visit_declarations(self)
+
+class Statement(ASTNode):
+    def __init__(self, name: str, type: str) -> None:
+        self.name = name
+        self.type = type
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_statement(self)
+
+class Statements(ASTNode):
+    def __init__(self, statement: Statement, statements: Statements) -> None:
+        self.statement = statement
+        self.statements = statements
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_statements(self)
 
 class Assignment(ASTNode):
     def __init__(self, lhs: str, rhs: ASTNode) -> None:

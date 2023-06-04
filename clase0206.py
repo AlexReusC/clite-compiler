@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',']
@@ -72,11 +72,14 @@ def p_Declaration(p):
     '''
     p[0] = Declaration(p[2], p[1].upper())
 
+
 def p_Statements(p):
     '''
-    Statements : Statement
+    Statements : Statement Statements
+               | empty
     '''
-    p[0] = p[1]
+    if len(p) > 2:
+        p[0] = Statements(p[1], p[2])
 
 def p_Statement(p):
     '''
@@ -141,6 +144,13 @@ def p_Factor(p):
     else:
         p[0] = BinaryOp(p[2], p[1], p[3])
 
+def p_UnaryOp(p):
+    """
+    UnaryOp : '-'
+            | '!'
+    """
+    p[0] = p[1]
+
 def p_Primary_IntLit(p):
     'Primary : INTLIT'
     p[0] = Literal(p[1], 'INT')
@@ -189,6 +199,14 @@ class IRGenerator(Visitor):
         node.declaration.accept(self)
         if node.declarations != None:
             node.declarations.accept(self)
+
+    def visit_statement(self, node: Statement) -> None:
+        pass
+
+    def visit_statements(self, node: Statements) -> None:
+        node.statement.accept(self)
+        if node.statements != None:
+            node.statements.accept(self)
         
     def visit_assignment(self, node: Assignment) -> None:
         node.rhs.accept(self)
@@ -227,6 +245,9 @@ data =  '''
         int main() {
             int x;
             int y;
+            int z;
+
+            z = x;
             
             if (x < 10)
                 x = y * 5;
