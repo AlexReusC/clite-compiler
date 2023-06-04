@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = "AND ELSE EQ FLOAT GTE ID IF INT INTLIT LTE MAIN NEQ OR RETURN WHILE\n    Program : INT MAIN '(' ')' '{' Declarations Statements '}'\n    \n    Declarations : Declaration\n    \n    Declaration : INT ID ';'\n    \n    Statements : Statement\n    \n    Statement : Assignment\n    \n    Assignment : ID '=' Expression ';'\n    \n    Expression : Conjunction\n    \n    Conjunction : Equality\n    \n    Equality : Relation\n    \n    Relation : Addition\n             | Relation '<' Addition \n    \n    Addition : Factor\n    \n    Factor : Primary\n           | Factor '*' Primary\n    Primary : INTLITPrimary : ID"
+_lr_signature = "AND ELSE EQ FLOAT GTE ID IF INT INTLIT LTE MAIN NEQ OR RETURN WHILE\n    Program : INT MAIN '(' ')' '{' Declarations Statements '}'\n    \n    empty :\n    \n    Declarations : Declaration Declarations\n                 | empty\n    \n    Declaration : INT ID ';'\n    \n    Statements : Statement\n    \n    Statement : Assignment\n              | IfStatement\n    \n    IfStatement : IF '(' Expression ')' Statement ELSE Statement\n    \n    Assignment : ID '=' Expression ';'\n    \n    Expression : Conjunction\n    \n    Conjunction : Equality\n    \n    Equality : Relation\n    \n    Relation : Addition\n             | Relation '<' Addition \n    \n    Addition : Factor\n    \n    Factor : Primary\n           | Factor '*' Primary\n    Primary : INTLITPrimary : ID"
     
-_lr_action_items = {'INT':([0,6,],[2,7,]),'$end':([1,16,],[0,-1,]),'MAIN':([2,],[3,]),'(':([3,],[4,]),')':([4,],[5,]),'{':([5,],[6,]),'ID':([7,8,9,15,17,28,29,],[10,14,-2,-3,18,18,18,]),';':([10,18,19,20,21,22,23,24,25,26,30,31,],[15,-16,27,-7,-8,-9,-10,-12,-13,-15,-11,-14,]),'}':([11,12,13,27,],[16,-4,-5,-6,]),'=':([14,],[17,]),'INTLIT':([17,28,29,],[26,26,26,]),'*':([18,24,25,26,31,],[-16,29,-13,-15,-14,]),'<':([18,22,23,24,25,26,30,31,],[-16,28,-10,-12,-13,-15,-11,-14,]),}
+_lr_action_items = {'INT':([0,6,9,19,],[2,7,7,-5,]),'$end':([1,20,],[0,-1,]),'MAIN':([2,],[3,]),'(':([3,17,],[4,22,]),')':([4,23,25,26,27,28,29,30,31,32,37,38,],[5,-20,-11,-12,-13,-14,-16,-17,-19,36,-15,-18,]),'{':([5,],[6,]),'ID':([6,7,8,9,10,18,19,21,22,34,35,36,40,],[-2,11,16,-2,-4,-3,-5,23,23,23,23,16,16,]),'IF':([6,8,9,10,18,19,36,40,],[-2,17,-2,-4,-3,-5,17,17,]),';':([11,23,24,25,26,27,28,29,30,31,37,38,],[19,-20,33,-11,-12,-13,-14,-16,-17,-19,-15,-18,]),'}':([12,13,14,15,33,41,],[20,-6,-7,-8,-10,-9,]),'ELSE':([14,15,33,39,41,],[-7,-8,-10,40,-9,]),'=':([16,],[21,]),'INTLIT':([21,22,34,35,],[31,31,31,31,]),'*':([23,29,30,31,38,],[-20,35,-17,-19,-18,]),'<':([23,27,28,29,30,31,37,38,],[-20,34,-14,-16,-17,-19,-15,-18,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'Program':([0,],[1,]),'Declarations':([6,],[8,]),'Declaration':([6,],[9,]),'Statements':([8,],[11,]),'Statement':([8,],[12,]),'Assignment':([8,],[13,]),'Expression':([17,],[19,]),'Conjunction':([17,],[20,]),'Equality':([17,],[21,]),'Relation':([17,],[22,]),'Addition':([17,28,],[23,30,]),'Factor':([17,28,],[24,24,]),'Primary':([17,28,29,],[25,25,31,]),}
+_lr_goto_items = {'Program':([0,],[1,]),'Declarations':([6,9,],[8,18,]),'Declaration':([6,9,],[9,9,]),'empty':([6,9,],[10,10,]),'Statements':([8,],[12,]),'Statement':([8,36,40,],[13,39,41,]),'Assignment':([8,36,40,],[14,14,14,]),'IfStatement':([8,36,40,],[15,15,15,]),'Expression':([21,22,],[24,32,]),'Conjunction':([21,22,],[25,25,]),'Equality':([21,22,],[26,26,]),'Relation':([21,22,],[27,27,]),'Addition':([21,22,34,],[28,28,37,]),'Factor':([21,22,34,],[29,29,29,]),'Primary':([21,22,34,35,],[30,30,30,38,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -28,19 +28,23 @@ del _lr_goto_items
 _lr_productions = [
   ("S' -> Program","S'",1,None,None,None),
   ('Program -> INT MAIN ( ) { Declarations Statements }','Program',8,'p_Program','clase0206.py',51),
-  ('Declarations -> Declaration','Declarations',1,'p_Declarations','clase0206.py',63),
-  ('Declaration -> INT ID ;','Declaration',3,'p_Declaration','clase0206.py',75),
-  ('Statements -> Statement','Statements',1,'p_Statements','clase0206.py',81),
-  ('Statement -> Assignment','Statement',1,'p_Statement','clase0206.py',87),
-  ('Assignment -> ID = Expression ;','Assignment',4,'p_Assignment','clase0206.py',93),
-  ('Expression -> Conjunction','Expression',1,'p_Expression','clase0206.py',99),
-  ('Conjunction -> Equality','Conjunction',1,'p_Conjunction','clase0206.py',105),
-  ('Equality -> Relation','Equality',1,'p_Equality','clase0206.py',111),
-  ('Relation -> Addition','Relation',1,'p_Relation','clase0206.py',117),
-  ('Relation -> Relation < Addition','Relation',3,'p_Relation','clase0206.py',118),
-  ('Addition -> Factor','Addition',1,'p_Addition','clase0206.py',127),
-  ('Factor -> Primary','Factor',1,'p_Factor','clase0206.py',133),
-  ('Factor -> Factor * Primary','Factor',3,'p_Factor','clase0206.py',134),
-  ('Primary -> INTLIT','Primary',1,'p_Primary_IntLit','clase0206.py',142),
-  ('Primary -> ID','Primary',1,'p_Primary_Id','clase0206.py',146),
+  ('empty -> <empty>','empty',0,'p_empty','clase0206.py',57),
+  ('Declarations -> Declaration Declarations','Declarations',2,'p_Declarations','clase0206.py',63),
+  ('Declarations -> empty','Declarations',1,'p_Declarations','clase0206.py',64),
+  ('Declaration -> INT ID ;','Declaration',3,'p_Declaration','clase0206.py',71),
+  ('Statements -> Statement','Statements',1,'p_Statements','clase0206.py',77),
+  ('Statement -> Assignment','Statement',1,'p_Statement','clase0206.py',83),
+  ('Statement -> IfStatement','Statement',1,'p_Statement','clase0206.py',84),
+  ('IfStatement -> IF ( Expression ) Statement ELSE Statement','IfStatement',7,'p_IfStatement','clase0206.py',90),
+  ('Assignment -> ID = Expression ;','Assignment',4,'p_Assignment','clase0206.py',96),
+  ('Expression -> Conjunction','Expression',1,'p_Expression','clase0206.py',102),
+  ('Conjunction -> Equality','Conjunction',1,'p_Conjunction','clase0206.py',108),
+  ('Equality -> Relation','Equality',1,'p_Equality','clase0206.py',114),
+  ('Relation -> Addition','Relation',1,'p_Relation','clase0206.py',120),
+  ('Relation -> Relation < Addition','Relation',3,'p_Relation','clase0206.py',121),
+  ('Addition -> Factor','Addition',1,'p_Addition','clase0206.py',130),
+  ('Factor -> Primary','Factor',1,'p_Factor','clase0206.py',136),
+  ('Factor -> Factor * Primary','Factor',3,'p_Factor','clase0206.py',137),
+  ('Primary -> INTLIT','Primary',1,'p_Primary_IntLit','clase0206.py',145),
+  ('Primary -> ID','Primary',1,'p_Primary_Id','clase0206.py',149),
 ]

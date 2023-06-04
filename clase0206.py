@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',']
@@ -52,23 +52,19 @@ def p_Program(p):
     '''
     p[0] = Program( p[6], p[7] )
 
-# def p_empty(p):
-#     '''
-#     empty :
-#     '''
-#     pass
+def p_empty(p):
+    '''
+    empty :
+    '''
+    pass
 
 def p_Declarations(p):
     '''
-    Declarations : Declaration
+    Declarations : Declaration Declarations
+                 | empty
     '''
-    p[0] = p[1]
-    # '''
-    # Declarations : Declaration Declarations
-    #              | empty
-    # '''
-    # if len(p) > 2:
-    #     p[0] = Declarations(p[1], p[2])
+    if len(p) > 2:
+        p[0] = Declarations(p[1], p[2])
     
 def p_Declaration(p):
     '''
@@ -85,8 +81,15 @@ def p_Statements(p):
 def p_Statement(p):
     '''
     Statement : Assignment
+              | IfStatement
     '''
     p[0] = p[1]
+
+def p_IfStatement(p):
+    '''
+    IfStatement : IF '(' Expression ')' Statement ELSE Statement
+    '''
+    p[0] = IfElse(p[3], p[5], p[7])
 
 def p_Assignment(p):
     '''
@@ -159,10 +162,33 @@ class IRGenerator(Visitor):
         node.decls.accept(self)
         node.stats.accept(self)
 
+    def visit_if_else(self, node: IfElse) -> None:
+        thenPart = func.append_basic_block('thenPart')
+        elsePart = func.append_basic_block('elsePart')
+        afterwards = func.append_basic_block('afterwards')
+        node.expr.accept(self)
+        expr = self.stack.pop()
+        builder.cbranch(expr, thenPart, elsePart)
+
+        # Then
+        self.builder.position_at_start(thenPart)
+        node.thenSt.accept(self)
+
+        # Else
+        self.builder.position_at_start(elsePart)
+        node.elseSt.accept(self)
+
+        self.builder.position_at_start(afterwards)
+
     def visit_declaration(self, node: Declaration) -> None:
         if node.type == 'INT':
             variable = self.builder.alloca(intType, name=node.name)
             self.symbolTable[node.name] = variable
+    
+    def visit_declarations(self, node: Declarations) -> None:
+        node.declaration.accept(self)
+        if node.declarations != None:
+            node.declarations.accept(self)
         
     def visit_assignment(self, node: Assignment) -> None:
         node.rhs.accept(self)
@@ -184,6 +210,10 @@ class IRGenerator(Visitor):
             self.stack.append(self.builder.add(lhs, rhs))
         elif node.op == '*':
             self.stack.append(self.builder.mul(lhs, rhs))
+        elif node.op == '<':
+            self.stack.append(
+                    self.builder.icmp_signed(node.op, lhs, rhs),
+            )
 
 module = ir.Module(name="prog")
 
@@ -196,8 +226,12 @@ builder = ir.IRBuilder(entry)
 data =  '''
         int main() {
             int x;
+            int y;
             
-            x = 5;
+            if (x < 10)
+                x = y * 5;
+            else
+                x = x * 7;
         }
         '''
 lexer = lex.lex()

@@ -3,11 +3,9 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 Unused terminals:
 
     AND
-    ELSE
     EQ
     FLOAT
     GTE
-    IF
     LTE
     NEQ
     OR
@@ -18,39 +16,43 @@ Grammar
 
 Rule 0     S' -> Program
 Rule 1     Program -> INT MAIN ( ) { Declarations Statements }
-Rule 2     Declarations -> Declaration
-Rule 3     Declaration -> INT ID ;
-Rule 4     Statements -> Statement
-Rule 5     Statement -> Assignment
-Rule 6     Assignment -> ID = Expression ;
-Rule 7     Expression -> Conjunction
-Rule 8     Conjunction -> Equality
-Rule 9     Equality -> Relation
-Rule 10    Relation -> Addition
-Rule 11    Relation -> Relation < Addition
-Rule 12    Addition -> Factor
-Rule 13    Factor -> Primary
-Rule 14    Factor -> Factor * Primary
-Rule 15    Primary -> INTLIT
-Rule 16    Primary -> ID
+Rule 2     empty -> <empty>
+Rule 3     Declarations -> Declaration Declarations
+Rule 4     Declarations -> empty
+Rule 5     Declaration -> INT ID ;
+Rule 6     Statements -> Statement
+Rule 7     Statement -> Assignment
+Rule 8     Statement -> IfStatement
+Rule 9     IfStatement -> IF ( Expression ) Statement ELSE Statement
+Rule 10    Assignment -> ID = Expression ;
+Rule 11    Expression -> Conjunction
+Rule 12    Conjunction -> Equality
+Rule 13    Equality -> Relation
+Rule 14    Relation -> Addition
+Rule 15    Relation -> Relation < Addition
+Rule 16    Addition -> Factor
+Rule 17    Factor -> Primary
+Rule 18    Factor -> Factor * Primary
+Rule 19    Primary -> INTLIT
+Rule 20    Primary -> ID
 
 Terminals, with rules where they appear
 
-(                    : 1
-)                    : 1
-*                    : 14
-;                    : 3 6
-<                    : 11
-=                    : 6
+(                    : 1 9
+)                    : 1 9
+*                    : 18
+;                    : 5 10
+<                    : 15
+=                    : 10
 AND                  : 
-ELSE                 : 
+ELSE                 : 9
 EQ                   : 
 FLOAT                : 
 GTE                  : 
-ID                   : 3 6 16
-IF                   : 
-INT                  : 1 3
-INTLIT               : 15
+ID                   : 5 10 20
+IF                   : 9
+INT                  : 1 5
+INTLIT               : 19
 LTE                  : 
 MAIN                 : 1
 NEQ                  : 
@@ -63,19 +65,21 @@ error                :
 
 Nonterminals, with rules where they appear
 
-Addition             : 10 11
-Assignment           : 5
-Conjunction          : 7
-Declaration          : 2
-Declarations         : 1
-Equality             : 8
-Expression           : 6
-Factor               : 12 14
-Primary              : 13 14
+Addition             : 14 15
+Assignment           : 7
+Conjunction          : 11
+Declaration          : 3
+Declarations         : 1 3
+Equality             : 12
+Expression           : 9 10
+Factor               : 16 18
+IfStatement          : 8
+Primary              : 17 18
 Program              : 0
-Relation             : 9 11
-Statement            : 4
+Relation             : 13 15
+Statement            : 6 9 9
 Statements           : 1
+empty                : 4
 
 Parsing method: LALR
 
@@ -125,237 +129,377 @@ state 5
 state 6
 
     (1) Program -> INT MAIN ( ) { . Declarations Statements }
-    (2) Declarations -> . Declaration
-    (3) Declaration -> . INT ID ;
+    (3) Declarations -> . Declaration Declarations
+    (4) Declarations -> . empty
+    (5) Declaration -> . INT ID ;
+    (2) empty -> .
 
     INT             shift and go to state 7
+    ID              reduce using rule 2 (empty -> .)
+    IF              reduce using rule 2 (empty -> .)
 
     Declarations                   shift and go to state 8
     Declaration                    shift and go to state 9
+    empty                          shift and go to state 10
 
 state 7
 
-    (3) Declaration -> INT . ID ;
+    (5) Declaration -> INT . ID ;
 
-    ID              shift and go to state 10
+    ID              shift and go to state 11
 
 
 state 8
 
     (1) Program -> INT MAIN ( ) { Declarations . Statements }
-    (4) Statements -> . Statement
-    (5) Statement -> . Assignment
-    (6) Assignment -> . ID = Expression ;
+    (6) Statements -> . Statement
+    (7) Statement -> . Assignment
+    (8) Statement -> . IfStatement
+    (10) Assignment -> . ID = Expression ;
+    (9) IfStatement -> . IF ( Expression ) Statement ELSE Statement
 
-    ID              shift and go to state 14
+    ID              shift and go to state 16
+    IF              shift and go to state 17
 
-    Statements                     shift and go to state 11
-    Statement                      shift and go to state 12
-    Assignment                     shift and go to state 13
+    Statements                     shift and go to state 12
+    Statement                      shift and go to state 13
+    Assignment                     shift and go to state 14
+    IfStatement                    shift and go to state 15
 
 state 9
 
-    (2) Declarations -> Declaration .
+    (3) Declarations -> Declaration . Declarations
+    (3) Declarations -> . Declaration Declarations
+    (4) Declarations -> . empty
+    (5) Declaration -> . INT ID ;
+    (2) empty -> .
 
-    ID              reduce using rule 2 (Declarations -> Declaration .)
+    INT             shift and go to state 7
+    ID              reduce using rule 2 (empty -> .)
+    IF              reduce using rule 2 (empty -> .)
 
+    Declaration                    shift and go to state 9
+    Declarations                   shift and go to state 18
+    empty                          shift and go to state 10
 
 state 10
 
-    (3) Declaration -> INT ID . ;
+    (4) Declarations -> empty .
 
-    ;               shift and go to state 15
+    ID              reduce using rule 4 (Declarations -> empty .)
+    IF              reduce using rule 4 (Declarations -> empty .)
 
 
 state 11
 
-    (1) Program -> INT MAIN ( ) { Declarations Statements . }
+    (5) Declaration -> INT ID . ;
 
-    }               shift and go to state 16
+    ;               shift and go to state 19
 
 
 state 12
 
-    (4) Statements -> Statement .
+    (1) Program -> INT MAIN ( ) { Declarations Statements . }
 
-    }               reduce using rule 4 (Statements -> Statement .)
+    }               shift and go to state 20
 
 
 state 13
 
-    (5) Statement -> Assignment .
+    (6) Statements -> Statement .
 
-    }               reduce using rule 5 (Statement -> Assignment .)
+    }               reduce using rule 6 (Statements -> Statement .)
 
 
 state 14
 
-    (6) Assignment -> ID . = Expression ;
+    (7) Statement -> Assignment .
 
-    =               shift and go to state 17
+    }               reduce using rule 7 (Statement -> Assignment .)
+    ELSE            reduce using rule 7 (Statement -> Assignment .)
 
 
 state 15
 
-    (3) Declaration -> INT ID ; .
+    (8) Statement -> IfStatement .
 
-    ID              reduce using rule 3 (Declaration -> INT ID ; .)
+    }               reduce using rule 8 (Statement -> IfStatement .)
+    ELSE            reduce using rule 8 (Statement -> IfStatement .)
 
 
 state 16
+
+    (10) Assignment -> ID . = Expression ;
+
+    =               shift and go to state 21
+
+
+state 17
+
+    (9) IfStatement -> IF . ( Expression ) Statement ELSE Statement
+
+    (               shift and go to state 22
+
+
+state 18
+
+    (3) Declarations -> Declaration Declarations .
+
+    ID              reduce using rule 3 (Declarations -> Declaration Declarations .)
+    IF              reduce using rule 3 (Declarations -> Declaration Declarations .)
+
+
+state 19
+
+    (5) Declaration -> INT ID ; .
+
+    INT             reduce using rule 5 (Declaration -> INT ID ; .)
+    ID              reduce using rule 5 (Declaration -> INT ID ; .)
+    IF              reduce using rule 5 (Declaration -> INT ID ; .)
+
+
+state 20
 
     (1) Program -> INT MAIN ( ) { Declarations Statements } .
 
     $end            reduce using rule 1 (Program -> INT MAIN ( ) { Declarations Statements } .)
 
 
-state 17
-
-    (6) Assignment -> ID = . Expression ;
-    (7) Expression -> . Conjunction
-    (8) Conjunction -> . Equality
-    (9) Equality -> . Relation
-    (10) Relation -> . Addition
-    (11) Relation -> . Relation < Addition
-    (12) Addition -> . Factor
-    (13) Factor -> . Primary
-    (14) Factor -> . Factor * Primary
-    (15) Primary -> . INTLIT
-    (16) Primary -> . ID
-
-    INTLIT          shift and go to state 26
-    ID              shift and go to state 18
-
-    Expression                     shift and go to state 19
-    Conjunction                    shift and go to state 20
-    Equality                       shift and go to state 21
-    Relation                       shift and go to state 22
-    Addition                       shift and go to state 23
-    Factor                         shift and go to state 24
-    Primary                        shift and go to state 25
-
-state 18
-
-    (16) Primary -> ID .
-
-    *               reduce using rule 16 (Primary -> ID .)
-    <               reduce using rule 16 (Primary -> ID .)
-    ;               reduce using rule 16 (Primary -> ID .)
-
-
-state 19
-
-    (6) Assignment -> ID = Expression . ;
-
-    ;               shift and go to state 27
-
-
-state 20
-
-    (7) Expression -> Conjunction .
-
-    ;               reduce using rule 7 (Expression -> Conjunction .)
-
-
 state 21
 
-    (8) Conjunction -> Equality .
+    (10) Assignment -> ID = . Expression ;
+    (11) Expression -> . Conjunction
+    (12) Conjunction -> . Equality
+    (13) Equality -> . Relation
+    (14) Relation -> . Addition
+    (15) Relation -> . Relation < Addition
+    (16) Addition -> . Factor
+    (17) Factor -> . Primary
+    (18) Factor -> . Factor * Primary
+    (19) Primary -> . INTLIT
+    (20) Primary -> . ID
 
-    ;               reduce using rule 8 (Conjunction -> Equality .)
+    INTLIT          shift and go to state 31
+    ID              shift and go to state 23
 
+    Expression                     shift and go to state 24
+    Conjunction                    shift and go to state 25
+    Equality                       shift and go to state 26
+    Relation                       shift and go to state 27
+    Addition                       shift and go to state 28
+    Factor                         shift and go to state 29
+    Primary                        shift and go to state 30
 
 state 22
 
-    (9) Equality -> Relation .
-    (11) Relation -> Relation . < Addition
+    (9) IfStatement -> IF ( . Expression ) Statement ELSE Statement
+    (11) Expression -> . Conjunction
+    (12) Conjunction -> . Equality
+    (13) Equality -> . Relation
+    (14) Relation -> . Addition
+    (15) Relation -> . Relation < Addition
+    (16) Addition -> . Factor
+    (17) Factor -> . Primary
+    (18) Factor -> . Factor * Primary
+    (19) Primary -> . INTLIT
+    (20) Primary -> . ID
 
-    ;               reduce using rule 9 (Equality -> Relation .)
-    <               shift and go to state 28
+    INTLIT          shift and go to state 31
+    ID              shift and go to state 23
 
+    Expression                     shift and go to state 32
+    Conjunction                    shift and go to state 25
+    Equality                       shift and go to state 26
+    Relation                       shift and go to state 27
+    Addition                       shift and go to state 28
+    Factor                         shift and go to state 29
+    Primary                        shift and go to state 30
 
 state 23
 
-    (10) Relation -> Addition .
+    (20) Primary -> ID .
 
-    <               reduce using rule 10 (Relation -> Addition .)
-    ;               reduce using rule 10 (Relation -> Addition .)
+    *               reduce using rule 20 (Primary -> ID .)
+    <               reduce using rule 20 (Primary -> ID .)
+    ;               reduce using rule 20 (Primary -> ID .)
+    )               reduce using rule 20 (Primary -> ID .)
 
 
 state 24
 
-    (12) Addition -> Factor .
-    (14) Factor -> Factor . * Primary
+    (10) Assignment -> ID = Expression . ;
 
-    <               reduce using rule 12 (Addition -> Factor .)
-    ;               reduce using rule 12 (Addition -> Factor .)
-    *               shift and go to state 29
+    ;               shift and go to state 33
 
 
 state 25
 
-    (13) Factor -> Primary .
+    (11) Expression -> Conjunction .
 
-    *               reduce using rule 13 (Factor -> Primary .)
-    <               reduce using rule 13 (Factor -> Primary .)
-    ;               reduce using rule 13 (Factor -> Primary .)
+    ;               reduce using rule 11 (Expression -> Conjunction .)
+    )               reduce using rule 11 (Expression -> Conjunction .)
 
 
 state 26
 
-    (15) Primary -> INTLIT .
+    (12) Conjunction -> Equality .
 
-    *               reduce using rule 15 (Primary -> INTLIT .)
-    <               reduce using rule 15 (Primary -> INTLIT .)
-    ;               reduce using rule 15 (Primary -> INTLIT .)
+    ;               reduce using rule 12 (Conjunction -> Equality .)
+    )               reduce using rule 12 (Conjunction -> Equality .)
 
 
 state 27
 
-    (6) Assignment -> ID = Expression ; .
+    (13) Equality -> Relation .
+    (15) Relation -> Relation . < Addition
 
-    }               reduce using rule 6 (Assignment -> ID = Expression ; .)
+    ;               reduce using rule 13 (Equality -> Relation .)
+    )               reduce using rule 13 (Equality -> Relation .)
+    <               shift and go to state 34
 
 
 state 28
 
-    (11) Relation -> Relation < . Addition
-    (12) Addition -> . Factor
-    (13) Factor -> . Primary
-    (14) Factor -> . Factor * Primary
-    (15) Primary -> . INTLIT
-    (16) Primary -> . ID
+    (14) Relation -> Addition .
 
-    INTLIT          shift and go to state 26
-    ID              shift and go to state 18
+    <               reduce using rule 14 (Relation -> Addition .)
+    ;               reduce using rule 14 (Relation -> Addition .)
+    )               reduce using rule 14 (Relation -> Addition .)
 
-    Addition                       shift and go to state 30
-    Factor                         shift and go to state 24
-    Primary                        shift and go to state 25
 
 state 29
 
-    (14) Factor -> Factor * . Primary
-    (15) Primary -> . INTLIT
-    (16) Primary -> . ID
+    (16) Addition -> Factor .
+    (18) Factor -> Factor . * Primary
 
-    INTLIT          shift and go to state 26
-    ID              shift and go to state 18
+    <               reduce using rule 16 (Addition -> Factor .)
+    ;               reduce using rule 16 (Addition -> Factor .)
+    )               reduce using rule 16 (Addition -> Factor .)
+    *               shift and go to state 35
 
-    Primary                        shift and go to state 31
 
 state 30
 
-    (11) Relation -> Relation < Addition .
+    (17) Factor -> Primary .
 
-    <               reduce using rule 11 (Relation -> Relation < Addition .)
-    ;               reduce using rule 11 (Relation -> Relation < Addition .)
+    *               reduce using rule 17 (Factor -> Primary .)
+    <               reduce using rule 17 (Factor -> Primary .)
+    ;               reduce using rule 17 (Factor -> Primary .)
+    )               reduce using rule 17 (Factor -> Primary .)
 
 
 state 31
 
-    (14) Factor -> Factor * Primary .
+    (19) Primary -> INTLIT .
 
-    *               reduce using rule 14 (Factor -> Factor * Primary .)
-    <               reduce using rule 14 (Factor -> Factor * Primary .)
-    ;               reduce using rule 14 (Factor -> Factor * Primary .)
+    *               reduce using rule 19 (Primary -> INTLIT .)
+    <               reduce using rule 19 (Primary -> INTLIT .)
+    ;               reduce using rule 19 (Primary -> INTLIT .)
+    )               reduce using rule 19 (Primary -> INTLIT .)
+
+
+state 32
+
+    (9) IfStatement -> IF ( Expression . ) Statement ELSE Statement
+
+    )               shift and go to state 36
+
+
+state 33
+
+    (10) Assignment -> ID = Expression ; .
+
+    }               reduce using rule 10 (Assignment -> ID = Expression ; .)
+    ELSE            reduce using rule 10 (Assignment -> ID = Expression ; .)
+
+
+state 34
+
+    (15) Relation -> Relation < . Addition
+    (16) Addition -> . Factor
+    (17) Factor -> . Primary
+    (18) Factor -> . Factor * Primary
+    (19) Primary -> . INTLIT
+    (20) Primary -> . ID
+
+    INTLIT          shift and go to state 31
+    ID              shift and go to state 23
+
+    Addition                       shift and go to state 37
+    Factor                         shift and go to state 29
+    Primary                        shift and go to state 30
+
+state 35
+
+    (18) Factor -> Factor * . Primary
+    (19) Primary -> . INTLIT
+    (20) Primary -> . ID
+
+    INTLIT          shift and go to state 31
+    ID              shift and go to state 23
+
+    Primary                        shift and go to state 38
+
+state 36
+
+    (9) IfStatement -> IF ( Expression ) . Statement ELSE Statement
+    (7) Statement -> . Assignment
+    (8) Statement -> . IfStatement
+    (10) Assignment -> . ID = Expression ;
+    (9) IfStatement -> . IF ( Expression ) Statement ELSE Statement
+
+    ID              shift and go to state 16
+    IF              shift and go to state 17
+
+    Statement                      shift and go to state 39
+    Assignment                     shift and go to state 14
+    IfStatement                    shift and go to state 15
+
+state 37
+
+    (15) Relation -> Relation < Addition .
+
+    <               reduce using rule 15 (Relation -> Relation < Addition .)
+    ;               reduce using rule 15 (Relation -> Relation < Addition .)
+    )               reduce using rule 15 (Relation -> Relation < Addition .)
+
+
+state 38
+
+    (18) Factor -> Factor * Primary .
+
+    *               reduce using rule 18 (Factor -> Factor * Primary .)
+    <               reduce using rule 18 (Factor -> Factor * Primary .)
+    ;               reduce using rule 18 (Factor -> Factor * Primary .)
+    )               reduce using rule 18 (Factor -> Factor * Primary .)
+
+
+state 39
+
+    (9) IfStatement -> IF ( Expression ) Statement . ELSE Statement
+
+    ELSE            shift and go to state 40
+
+
+state 40
+
+    (9) IfStatement -> IF ( Expression ) Statement ELSE . Statement
+    (7) Statement -> . Assignment
+    (8) Statement -> . IfStatement
+    (10) Assignment -> . ID = Expression ;
+    (9) IfStatement -> . IF ( Expression ) Statement ELSE Statement
+
+    ID              shift and go to state 16
+    IF              shift and go to state 17
+
+    Statement                      shift and go to state 41
+    Assignment                     shift and go to state 14
+    IfStatement                    shift and go to state 15
+
+state 41
+
+    (9) IfStatement -> IF ( Expression ) Statement ELSE Statement .
+
+    }               reduce using rule 9 (IfStatement -> IF ( Expression ) Statement ELSE Statement .)
+    ELSE            reduce using rule 9 (IfStatement -> IF ( Expression ) Statement ELSE Statement .)
 

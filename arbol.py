@@ -31,6 +31,16 @@ class Variable(ASTNode):
     def accept(self, visitor: Visitor):
         visitor.visit_variable(self)
 
+
+class IfElse(ASTNode):
+    def __init__(self, expr: Any, thenSt: Any, elseSt: Any) -> None:
+        self.expr = expr
+        self.thenSt = thenSt
+        self.elseSt = elseSt
+    
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_if_else(self)
+
 class BinaryOp(ASTNode):
     def __init__(self, op: str, lhs: ASTNode, rhs: ASTNode) -> None:
         self.lhs = lhs
@@ -63,7 +73,6 @@ class Assignment(ASTNode):
     
     def accept(self, visitor: Visitor):
         visitor.visit_assignment(self)
-
 
 class Visitor(ABC):
     @abstractmethod
