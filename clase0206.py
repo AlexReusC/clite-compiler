@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements, Factor
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements, Factor, WhileStatement
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
@@ -85,6 +85,8 @@ def p_Statement(p):
     '''
     Statement : Assignment
               | IfStatement
+              | WhileStatement
+              | ';'
     '''
     p[0] = p[1]
 
@@ -92,7 +94,14 @@ def p_IfStatement(p):
     '''
     IfStatement : IF '(' Expression ')' Statement ELSE Statement
     '''
+    print("p", p[7])
     p[0] = IfElse(p[3], p[5], p[7])
+
+def p_WhileStatement(p):
+    '''
+    WhileStatement : WHILE '(' Expression ')' Statement
+    '''
+    p[0] = WhileStatement(p[3], p[5])
 
 def p_Assignment(p):
     '''
@@ -140,7 +149,7 @@ def p_EquOp(p):
 def p_Relation(p):
     '''
     Relation : Addition
-             | Addition EquOp Addition 
+             | Addition RelOp Addition 
     '''
     if len(p) > 2:
         p[0] = BinaryOp(p[2], p[1], p[3])
@@ -254,6 +263,24 @@ class IRGenerator(Visitor):
 
         self.builder.position_at_start(afterwards)
 
+    def visit_while(self, node: WhileStatement) -> None:
+        while_body = func.append_basic_block('whileBody')
+        afterwards = func.append_basic_block('afterwards')
+
+        node.expr.accept(self)
+        expr = self.stack.pop()
+        self.builder.cbranch(expr, while_body, afterwards)
+
+        #body
+        self.builder.position_at_start(while_body)
+        node.st.accept(self)
+        node.expr.accept(self)
+        expr = self.stack.pop()
+        self.builder.cbranch(expr, while_body, afterwards)
+
+        #after
+        self.builder.position_at_start(afterwards)
+
     def visit_declaration(self, node: Declaration) -> None:
         if node.type == 'INT':
             variable = self.builder.alloca(intType, name=node.name)
@@ -331,9 +358,15 @@ data =  '''
 
 
             if (1 == 1 || 1 == 1 )
-                x = y * 5;
+                x = 1;
             else
-                x = x * 7;
+                x = 1;
+            
+            x = 1;
+            
+            while(0)
+                x = 1;
+            
         }
         '''
 lexer = lex.lex()

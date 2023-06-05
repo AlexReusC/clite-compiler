@@ -42,6 +42,14 @@ class IfElse(ASTNode):
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_if_else(self)
 
+class WhileStatement(ASTNode):
+    def __init__(self, expr: Any, st: Any) -> None:
+        self.expr = expr
+        self.st = st
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_while(self)
+
 class BinaryOp(ASTNode):
     def __init__(self, op: str, lhs: ASTNode, rhs: ASTNode) -> None:
         self.lhs = lhs
