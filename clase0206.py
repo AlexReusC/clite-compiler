@@ -10,6 +10,9 @@ reserved = {
     'float' : 'FLOAT',
     'if' : 'IF',
     'int' : 'INT',
+    'bool' : 'BOOL',
+    'float' : 'FLOAT',
+    'char' : 'CHAR',
     'main' : 'MAIN',
     'return' : 'RETURN',
     'while' : 'WHILE'
@@ -68,10 +71,18 @@ def p_Declarations(p):
     
 def p_Declaration(p):
     '''
-    Declaration : INT ID ';'
+    Declaration : Type ID ';'
     '''
     p[0] = Declaration(p[2], p[1].upper())
 
+def p_Type(p):
+    '''
+    Type : INT
+         | BOOL
+         | FLOAT
+         | CHAR
+    '''
+    p[0] = p[1]
 
 def p_Statements(p):
     '''
@@ -87,14 +98,20 @@ def p_Statement(p):
               | IfStatement
               | WhileStatement
               | ';'
+              | Block
     '''
     p[0] = p[1]
+
+def p_Block(p):
+    '''
+    Block : '{' Statements '}'
+    '''
+    p[0] = p[2]
 
 def p_IfStatement(p):
     '''
     IfStatement : IF '(' Expression ')' Statement ELSE Statement
     '''
-    print("p", p[7])
     p[0] = IfElse(p[3], p[5], p[7])
 
 def p_WhileStatement(p):
@@ -234,6 +251,7 @@ def p_Primary_Id(p):
 
 # %%
 intType = ir.IntType(32)
+boolType = ir.IntType(32)
 
 class IRGenerator(Visitor):
     def __init__(self, builder):
@@ -285,7 +303,10 @@ class IRGenerator(Visitor):
         if node.type == 'INT':
             variable = self.builder.alloca(intType, name=node.name)
             self.symbolTable[node.name] = variable
-    
+        elif node.type == 'BOOL':
+            variable = self.builder.alloca(boolType, name=node.name)
+            self.symbolTable[node.name] = variable
+
     def visit_declarations(self, node: Declarations) -> None:
         node.declaration.accept(self)
         if node.declarations != None:
@@ -314,7 +335,7 @@ class IRGenerator(Visitor):
 
         if node.type == '!':
             #self.stack.append(self.builder.neg(node.value))
-            self.stack.append(intType(node.value))
+            pass
         elif node.type == '-':
             pass
             #self.stack.append(self.builder.neg(node.value))
@@ -355,7 +376,9 @@ data =  '''
         int main() {
             int x;
             int y;
+            bool t;
 
+            t = 1;
 
             if (1 == 1 || 1 == 1 )
                 x = 1;
@@ -364,9 +387,10 @@ data =  '''
             
             x = 1;
             
-            while(0)
+            while(t){
                 x = 1;
-            
+                x = 2;
+            }
         }
         '''
 lexer = lex.lex()

@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = "AND ELSE EQ FLOAT GTE ID IF INT INTLIT LTE MAIN NEQ OR RETURN WHILE\n    Program : INT MAIN '(' ')' '{' Declarations Statements '}'\n    \n    empty :\n    \n    Declarations : Declaration Declarations\n                 | empty\n    \n    Declaration : INT ID ';'\n    \n    Statements : Statement Statements\n               | empty\n    \n    Statement : Assignment\n              | IfStatement\n              | WhileStatement\n              | ';'\n    \n    IfStatement : IF '(' Expression ')' Statement ELSE Statement\n    \n    WhileStatement : WHILE '(' Expression ')' Statement\n    \n    Assignment : ID '=' Expression ';'\n    \n    Expression : Conjunction\n               | Expression OR Conjunction\n    \n    Conjunction : Equality\n                | Conjunction AND Equality\n    \n    Equality : Relation\n             | Relation EquOp Relation\n    \n    EquOp : EQ\n          | NEQ\n    \n    Relation : Addition\n             | Addition RelOp Addition \n    \n    RelOp : '<'\n          | LTE\n          | '>'\n          | GTE\n    \n    Addition : Term\n             | Addition AddOp Term\n    \n    AddOp : '+'\n          | '-'\n    \n    Term : Factor\n         | Term MulOp Primary\n    \n    MulOp : '*'\n          | '/'\n          | '%'\n    \n    Factor : Primary\n           | UnaryOp Primary\n    \n    UnaryOp : '-'\n            | '!'\n    Primary : INTLITPrimary : ID"
+_lr_signature = "AND BOOL CHAR ELSE EQ FLOAT GTE ID IF INT INTLIT LTE MAIN NEQ OR RETURN WHILE\n    Program : INT MAIN '(' ')' '{' Declarations Statements '}'\n    \n    empty :\n    \n    Declarations : Declaration Declarations\n                 | empty\n    \n    Declaration : Type ID ';'\n    \n    Type : INT\n         | BOOL\n         | FLOAT\n         | CHAR\n    \n    Statements : Statement Statements\n               | empty\n    \n    Statement : Assignment\n              | IfStatement\n              | WhileStatement\n              | ';'\n              | Block\n    \n    Block : '{' Statements '}'\n    \n    IfStatement : IF '(' Expression ')' Statement ELSE Statement\n    \n    WhileStatement : WHILE '(' Expression ')' Statement\n    \n    Assignment : ID '=' Expression ';'\n    \n    Expression : Conjunction\n               | Expression OR Conjunction\n    \n    Conjunction : Equality\n                | Conjunction AND Equality\n    \n    Equality : Relation\n             | Relation EquOp Relation\n    \n    EquOp : EQ\n          | NEQ\n    \n    Relation : Addition\n             | Addition RelOp Addition \n    \n    RelOp : '<'\n          | LTE\n          | '>'\n          | GTE\n    \n    Addition : Term\n             | Addition AddOp Term\n    \n    AddOp : '+'\n          | '-'\n    \n    Term : Factor\n         | Term MulOp Primary\n    \n    MulOp : '*'\n          | '/'\n          | '%'\n    \n    Factor : Primary\n           | UnaryOp Primary\n    \n    UnaryOp : '-'\n            | '!'\n    Primary : INTLITPrimary : ID"
     
-_lr_action_items = {'INT':([0,6,9,23,],[2,7,7,-5,]),'$end':([1,24,],[0,-1,]),'MAIN':([2,],[3,]),'(':([3,20,21,],[4,27,28,]),')':([4,29,31,32,33,34,35,36,37,39,42,43,62,65,66,67,68,69,70,],[5,-43,-15,-17,-19,-23,-29,-33,-38,-42,63,64,-39,-16,-18,-20,-24,-30,-34,]),'{':([5,],[6,]),';':([6,8,9,10,11,13,15,16,17,18,22,23,29,30,31,32,33,34,35,36,37,39,44,62,63,64,65,66,67,68,69,70,72,73,74,],[-2,18,-2,-4,23,18,-8,-9,-10,-11,-3,-5,-43,44,-15,-17,-19,-23,-29,-33,-38,-42,-14,-39,18,18,-16,-18,-20,-24,-30,-34,-13,18,-12,]),'ID':([6,7,8,9,10,13,15,16,17,18,22,23,26,27,28,38,40,41,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,63,64,72,73,74,],[-2,11,19,-2,-4,19,-8,-9,-10,-11,-3,-5,29,29,29,29,-40,-41,-14,29,29,29,-21,-22,29,29,-25,-26,-27,-28,-31,-32,29,-35,-36,-37,19,19,-13,19,-12,]),'IF':([6,8,9,10,13,15,16,17,18,22,23,44,63,64,72,73,74,],[-2,20,-2,-4,20,-8,-9,-10,-11,-3,-5,-14,20,20,-13,20,-12,]),'WHILE':([6,8,9,10,13,15,16,17,18,22,23,44,63,64,72,73,74,],[-2,21,-2,-4,21,-8,-9,-10,-11,-3,-5,-14,21,21,-13,21,-12,]),'}':([6,8,9,10,12,13,14,15,16,17,18,22,23,25,44,72,74,],[-2,-2,-2,-4,24,-2,-7,-8,-9,-10,-11,-3,-5,-6,-14,-13,-12,]),'ELSE':([15,16,17,18,44,71,72,74,],[-8,-9,-10,-11,-14,73,-13,-12,]),'=':([19,],[26,]),'INTLIT':([26,27,28,38,40,41,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,],[39,39,39,39,-40,-41,39,39,39,-21,-22,39,39,-25,-26,-27,-28,-31,-32,39,-35,-36,-37,]),'-':([26,27,28,29,34,35,36,37,39,45,46,47,48,49,50,51,52,53,54,55,56,57,62,68,69,70,],[40,40,40,-43,57,-29,-33,-38,-42,40,40,40,-21,-22,40,40,-25,-26,-27,-28,-31,-32,-39,57,-30,-34,]),'!':([26,27,28,45,46,47,48,49,50,51,52,53,54,55,56,57,],[41,41,41,41,41,41,-21,-22,41,41,-25,-26,-27,-28,-31,-32,]),'*':([29,35,36,37,39,62,69,70,],[-43,59,-33,-38,-42,-39,59,-34,]),'/':([29,35,36,37,39,62,69,70,],[-43,60,-33,-38,-42,-39,60,-34,]),'%':([29,35,36,37,39,62,69,70,],[-43,61,-33,-38,-42,-39,61,-34,]),'<':([29,34,35,36,37,39,62,69,70,],[-43,52,-29,-33,-38,-42,-39,-30,-34,]),'LTE':([29,34,35,36,37,39,62,69,70,],[-43,53,-29,-33,-38,-42,-39,-30,-34,]),'>':([29,34,35,36,37,39,62,69,70,],[-43,54,-29,-33,-38,-42,-39,-30,-34,]),'GTE':([29,34,35,36,37,39,62,69,70,],[-43,55,-29,-33,-38,-42,-39,-30,-34,]),'+':([29,34,35,36,37,39,62,68,69,70,],[-43,56,-29,-33,-38,-42,-39,56,-30,-34,]),'EQ':([29,33,34,35,36,37,39,62,68,69,70,],[-43,48,-23,-29,-33,-38,-42,-39,-24,-30,-34,]),'NEQ':([29,33,34,35,36,37,39,62,68,69,70,],[-43,49,-23,-29,-33,-38,-42,-39,-24,-30,-34,]),'AND':([29,31,32,33,34,35,36,37,39,62,65,66,67,68,69,70,],[-43,46,-17,-19,-23,-29,-33,-38,-42,-39,46,-18,-20,-24,-30,-34,]),'OR':([29,30,31,32,33,34,35,36,37,39,42,43,62,65,66,67,68,69,70,],[-43,45,-15,-17,-19,-23,-29,-33,-38,-42,45,45,-39,-16,-18,-20,-24,-30,-34,]),}
+_lr_action_items = {'INT':([0,6,9,35,],[2,7,7,-5,]),'$end':([1,30,],[0,-1,]),'MAIN':([2,],[3,]),'(':([3,25,26,],[4,33,34,]),')':([4,37,39,40,41,42,43,44,45,47,50,51,70,73,74,75,76,77,78,],[5,-49,-21,-23,-25,-29,-35,-39,-44,-48,71,72,-45,-22,-24,-26,-30,-36,-40,]),'{':([5,6,8,9,10,15,17,19,20,21,22,23,27,35,36,52,71,72,80,81,82,],[6,-2,15,-2,-4,15,15,-12,-13,-14,-15,-16,-3,-5,-17,-20,15,15,-19,15,-18,]),';':([6,8,9,10,15,17,19,20,21,22,23,27,28,35,36,37,38,39,40,41,42,43,44,45,47,52,70,71,72,73,74,75,76,77,78,80,81,82,],[-2,22,-2,-4,22,22,-12,-13,-14,-15,-16,-3,35,-5,-17,-49,52,-21,-23,-25,-29,-35,-39,-44,-48,-20,-45,22,22,-22,-24,-26,-30,-36,-40,-19,22,-18,]),'ID':([6,7,8,9,10,11,12,13,14,15,17,19,20,21,22,23,27,32,33,34,35,36,46,48,49,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,71,72,80,81,82,],[-2,-6,24,-2,-4,28,-7,-8,-9,24,24,-12,-13,-14,-15,-16,-3,37,37,37,-5,-17,37,-46,-47,-20,37,37,37,-27,-28,37,37,-31,-32,-33,-34,-37,-38,37,-41,-42,-43,24,24,-19,24,-18,]),'IF':([6,8,9,10,15,17,19,20,21,22,23,27,35,36,52,71,72,80,81,82,],[-2,25,-2,-4,25,25,-12,-13,-14,-15,-16,-3,-5,-17,-20,25,25,-19,25,-18,]),'WHILE':([6,8,9,10,15,17,19,20,21,22,23,27,35,36,52,71,72,80,81,82,],[-2,26,-2,-4,26,26,-12,-13,-14,-15,-16,-3,-5,-17,-20,26,26,-19,26,-18,]),'}':([6,8,9,10,15,16,17,18,19,20,21,22,23,27,29,31,35,36,52,80,82,],[-2,-2,-2,-4,-2,30,-2,-11,-12,-13,-14,-15,-16,-3,36,-10,-5,-17,-20,-19,-18,]),'BOOL':([6,9,35,],[12,12,-5,]),'FLOAT':([6,9,35,],[13,13,-5,]),'CHAR':([6,9,35,],[14,14,-5,]),'ELSE':([19,20,21,22,23,36,52,79,80,82,],[-12,-13,-14,-15,-16,-17,-20,81,-19,-18,]),'=':([24,],[32,]),'INTLIT':([32,33,34,46,48,49,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,],[47,47,47,47,-46,-47,47,47,47,-27,-28,47,47,-31,-32,-33,-34,-37,-38,47,-41,-42,-43,]),'-':([32,33,34,37,42,43,44,45,47,53,54,55,56,57,58,59,60,61,62,63,64,65,70,76,77,78,],[48,48,48,-49,65,-35,-39,-44,-48,48,48,48,-27,-28,48,48,-31,-32,-33,-34,-37,-38,-45,65,-36,-40,]),'!':([32,33,34,53,54,55,56,57,58,59,60,61,62,63,64,65,],[49,49,49,49,49,49,-27,-28,49,49,-31,-32,-33,-34,-37,-38,]),'*':([37,43,44,45,47,70,77,78,],[-49,67,-39,-44,-48,-45,67,-40,]),'/':([37,43,44,45,47,70,77,78,],[-49,68,-39,-44,-48,-45,68,-40,]),'%':([37,43,44,45,47,70,77,78,],[-49,69,-39,-44,-48,-45,69,-40,]),'<':([37,42,43,44,45,47,70,77,78,],[-49,60,-35,-39,-44,-48,-45,-36,-40,]),'LTE':([37,42,43,44,45,47,70,77,78,],[-49,61,-35,-39,-44,-48,-45,-36,-40,]),'>':([37,42,43,44,45,47,70,77,78,],[-49,62,-35,-39,-44,-48,-45,-36,-40,]),'GTE':([37,42,43,44,45,47,70,77,78,],[-49,63,-35,-39,-44,-48,-45,-36,-40,]),'+':([37,42,43,44,45,47,70,76,77,78,],[-49,64,-35,-39,-44,-48,-45,64,-36,-40,]),'EQ':([37,41,42,43,44,45,47,70,76,77,78,],[-49,56,-29,-35,-39,-44,-48,-45,-30,-36,-40,]),'NEQ':([37,41,42,43,44,45,47,70,76,77,78,],[-49,57,-29,-35,-39,-44,-48,-45,-30,-36,-40,]),'AND':([37,39,40,41,42,43,44,45,47,70,73,74,75,76,77,78,],[-49,54,-23,-25,-29,-35,-39,-44,-48,-45,54,-24,-26,-30,-36,-40,]),'OR':([37,38,39,40,41,42,43,44,45,47,50,51,70,73,74,75,76,77,78,],[-49,53,-21,-23,-25,-29,-35,-39,-44,-48,53,53,-45,-22,-24,-26,-30,-36,-40,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'Program':([0,],[1,]),'Declarations':([6,9,],[8,22,]),'Declaration':([6,9,],[9,9,]),'empty':([6,8,9,13,],[10,14,10,14,]),'Statements':([8,13,],[12,25,]),'Statement':([8,13,63,64,73,],[13,13,71,72,74,]),'Assignment':([8,13,63,64,73,],[15,15,15,15,15,]),'IfStatement':([8,13,63,64,73,],[16,16,16,16,16,]),'WhileStatement':([8,13,63,64,73,],[17,17,17,17,17,]),'Expression':([26,27,28,],[30,42,43,]),'Conjunction':([26,27,28,45,],[31,31,31,65,]),'Equality':([26,27,28,45,46,],[32,32,32,32,66,]),'Relation':([26,27,28,45,46,47,],[33,33,33,33,33,67,]),'Addition':([26,27,28,45,46,47,50,],[34,34,34,34,34,34,68,]),'Term':([26,27,28,45,46,47,50,51,],[35,35,35,35,35,35,35,69,]),'Factor':([26,27,28,45,46,47,50,51,],[36,36,36,36,36,36,36,36,]),'Primary':([26,27,28,38,45,46,47,50,51,58,],[37,37,37,62,37,37,37,37,37,70,]),'UnaryOp':([26,27,28,45,46,47,50,51,],[38,38,38,38,38,38,38,38,]),'EquOp':([33,],[47,]),'RelOp':([34,],[50,]),'AddOp':([34,68,],[51,51,]),'MulOp':([35,69,],[58,58,]),}
+_lr_goto_items = {'Program':([0,],[1,]),'Declarations':([6,9,],[8,27,]),'Declaration':([6,9,],[9,9,]),'empty':([6,8,9,15,17,],[10,18,10,18,18,]),'Type':([6,9,],[11,11,]),'Statements':([8,15,17,],[16,29,31,]),'Statement':([8,15,17,71,72,81,],[17,17,17,79,80,82,]),'Assignment':([8,15,17,71,72,81,],[19,19,19,19,19,19,]),'IfStatement':([8,15,17,71,72,81,],[20,20,20,20,20,20,]),'WhileStatement':([8,15,17,71,72,81,],[21,21,21,21,21,21,]),'Block':([8,15,17,71,72,81,],[23,23,23,23,23,23,]),'Expression':([32,33,34,],[38,50,51,]),'Conjunction':([32,33,34,53,],[39,39,39,73,]),'Equality':([32,33,34,53,54,],[40,40,40,40,74,]),'Relation':([32,33,34,53,54,55,],[41,41,41,41,41,75,]),'Addition':([32,33,34,53,54,55,58,],[42,42,42,42,42,42,76,]),'Term':([32,33,34,53,54,55,58,59,],[43,43,43,43,43,43,43,77,]),'Factor':([32,33,34,53,54,55,58,59,],[44,44,44,44,44,44,44,44,]),'Primary':([32,33,34,46,53,54,55,58,59,66,],[45,45,45,70,45,45,45,45,45,78,]),'UnaryOp':([32,33,34,53,54,55,58,59,],[46,46,46,46,46,46,46,46,]),'EquOp':([41,],[55,]),'RelOp':([42,],[58,]),'AddOp':([42,76,],[59,59,]),'MulOp':([43,77,],[66,66,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,47 +27,53 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> Program","S'",1,None,None,None),
-  ('Program -> INT MAIN ( ) { Declarations Statements }','Program',8,'p_Program','clase0206.py',51),
-  ('empty -> <empty>','empty',0,'p_empty','clase0206.py',57),
-  ('Declarations -> Declaration Declarations','Declarations',2,'p_Declarations','clase0206.py',63),
-  ('Declarations -> empty','Declarations',1,'p_Declarations','clase0206.py',64),
-  ('Declaration -> INT ID ;','Declaration',3,'p_Declaration','clase0206.py',71),
-  ('Statements -> Statement Statements','Statements',2,'p_Statements','clase0206.py',78),
-  ('Statements -> empty','Statements',1,'p_Statements','clase0206.py',79),
-  ('Statement -> Assignment','Statement',1,'p_Statement','clase0206.py',86),
-  ('Statement -> IfStatement','Statement',1,'p_Statement','clase0206.py',87),
-  ('Statement -> WhileStatement','Statement',1,'p_Statement','clase0206.py',88),
-  ('Statement -> ;','Statement',1,'p_Statement','clase0206.py',89),
-  ('IfStatement -> IF ( Expression ) Statement ELSE Statement','IfStatement',7,'p_IfStatement','clase0206.py',95),
-  ('WhileStatement -> WHILE ( Expression ) Statement','WhileStatement',5,'p_WhileStatement','clase0206.py',102),
-  ('Assignment -> ID = Expression ;','Assignment',4,'p_Assignment','clase0206.py',108),
-  ('Expression -> Conjunction','Expression',1,'p_Expression','clase0206.py',114),
-  ('Expression -> Expression OR Conjunction','Expression',3,'p_Expression','clase0206.py',115),
-  ('Conjunction -> Equality','Conjunction',1,'p_Conjunction','clase0206.py',124),
-  ('Conjunction -> Conjunction AND Equality','Conjunction',3,'p_Conjunction','clase0206.py',125),
-  ('Equality -> Relation','Equality',1,'p_Equality','clase0206.py',134),
-  ('Equality -> Relation EquOp Relation','Equality',3,'p_Equality','clase0206.py',135),
-  ('EquOp -> EQ','EquOp',1,'p_EquOp','clase0206.py',144),
-  ('EquOp -> NEQ','EquOp',1,'p_EquOp','clase0206.py',145),
-  ('Relation -> Addition','Relation',1,'p_Relation','clase0206.py',151),
-  ('Relation -> Addition RelOp Addition','Relation',3,'p_Relation','clase0206.py',152),
-  ('RelOp -> <','RelOp',1,'p_RelOp','clase0206.py',161),
-  ('RelOp -> LTE','RelOp',1,'p_RelOp','clase0206.py',162),
-  ('RelOp -> >','RelOp',1,'p_RelOp','clase0206.py',163),
-  ('RelOp -> GTE','RelOp',1,'p_RelOp','clase0206.py',164),
-  ('Addition -> Term','Addition',1,'p_Addition','clase0206.py',170),
-  ('Addition -> Addition AddOp Term','Addition',3,'p_Addition','clase0206.py',171),
-  ('AddOp -> +','AddOp',1,'p_AddOp','clase0206.py',180),
-  ('AddOp -> -','AddOp',1,'p_AddOp','clase0206.py',181),
-  ('Term -> Factor','Term',1,'p_Term','clase0206.py',187),
-  ('Term -> Term MulOp Primary','Term',3,'p_Term','clase0206.py',188),
-  ('MulOp -> *','MulOp',1,'p_MulOp','clase0206.py',197),
-  ('MulOp -> /','MulOp',1,'p_MulOp','clase0206.py',198),
-  ('MulOp -> %','MulOp',1,'p_MulOp','clase0206.py',199),
-  ('Factor -> Primary','Factor',1,'p_Factor','clase0206.py',205),
-  ('Factor -> UnaryOp Primary','Factor',2,'p_Factor','clase0206.py',206),
-  ('UnaryOp -> -','UnaryOp',1,'p_UnaryOp','clase0206.py',222),
-  ('UnaryOp -> !','UnaryOp',1,'p_UnaryOp','clase0206.py',223),
-  ('Primary -> INTLIT','Primary',1,'p_Primary_IntLit','clase0206.py',228),
-  ('Primary -> ID','Primary',1,'p_Primary_Id','clase0206.py',232),
+  ('Program -> INT MAIN ( ) { Declarations Statements }','Program',8,'p_Program','clase0206.py',54),
+  ('empty -> <empty>','empty',0,'p_empty','clase0206.py',60),
+  ('Declarations -> Declaration Declarations','Declarations',2,'p_Declarations','clase0206.py',66),
+  ('Declarations -> empty','Declarations',1,'p_Declarations','clase0206.py',67),
+  ('Declaration -> Type ID ;','Declaration',3,'p_Declaration','clase0206.py',74),
+  ('Type -> INT','Type',1,'p_Type','clase0206.py',80),
+  ('Type -> BOOL','Type',1,'p_Type','clase0206.py',81),
+  ('Type -> FLOAT','Type',1,'p_Type','clase0206.py',82),
+  ('Type -> CHAR','Type',1,'p_Type','clase0206.py',83),
+  ('Statements -> Statement Statements','Statements',2,'p_Statements','clase0206.py',89),
+  ('Statements -> empty','Statements',1,'p_Statements','clase0206.py',90),
+  ('Statement -> Assignment','Statement',1,'p_Statement','clase0206.py',97),
+  ('Statement -> IfStatement','Statement',1,'p_Statement','clase0206.py',98),
+  ('Statement -> WhileStatement','Statement',1,'p_Statement','clase0206.py',99),
+  ('Statement -> ;','Statement',1,'p_Statement','clase0206.py',100),
+  ('Statement -> Block','Statement',1,'p_Statement','clase0206.py',101),
+  ('Block -> { Statements }','Block',3,'p_Block','clase0206.py',107),
+  ('IfStatement -> IF ( Expression ) Statement ELSE Statement','IfStatement',7,'p_IfStatement','clase0206.py',113),
+  ('WhileStatement -> WHILE ( Expression ) Statement','WhileStatement',5,'p_WhileStatement','clase0206.py',120),
+  ('Assignment -> ID = Expression ;','Assignment',4,'p_Assignment','clase0206.py',126),
+  ('Expression -> Conjunction','Expression',1,'p_Expression','clase0206.py',132),
+  ('Expression -> Expression OR Conjunction','Expression',3,'p_Expression','clase0206.py',133),
+  ('Conjunction -> Equality','Conjunction',1,'p_Conjunction','clase0206.py',142),
+  ('Conjunction -> Conjunction AND Equality','Conjunction',3,'p_Conjunction','clase0206.py',143),
+  ('Equality -> Relation','Equality',1,'p_Equality','clase0206.py',152),
+  ('Equality -> Relation EquOp Relation','Equality',3,'p_Equality','clase0206.py',153),
+  ('EquOp -> EQ','EquOp',1,'p_EquOp','clase0206.py',162),
+  ('EquOp -> NEQ','EquOp',1,'p_EquOp','clase0206.py',163),
+  ('Relation -> Addition','Relation',1,'p_Relation','clase0206.py',169),
+  ('Relation -> Addition RelOp Addition','Relation',3,'p_Relation','clase0206.py',170),
+  ('RelOp -> <','RelOp',1,'p_RelOp','clase0206.py',179),
+  ('RelOp -> LTE','RelOp',1,'p_RelOp','clase0206.py',180),
+  ('RelOp -> >','RelOp',1,'p_RelOp','clase0206.py',181),
+  ('RelOp -> GTE','RelOp',1,'p_RelOp','clase0206.py',182),
+  ('Addition -> Term','Addition',1,'p_Addition','clase0206.py',188),
+  ('Addition -> Addition AddOp Term','Addition',3,'p_Addition','clase0206.py',189),
+  ('AddOp -> +','AddOp',1,'p_AddOp','clase0206.py',198),
+  ('AddOp -> -','AddOp',1,'p_AddOp','clase0206.py',199),
+  ('Term -> Factor','Term',1,'p_Term','clase0206.py',205),
+  ('Term -> Term MulOp Primary','Term',3,'p_Term','clase0206.py',206),
+  ('MulOp -> *','MulOp',1,'p_MulOp','clase0206.py',215),
+  ('MulOp -> /','MulOp',1,'p_MulOp','clase0206.py',216),
+  ('MulOp -> %','MulOp',1,'p_MulOp','clase0206.py',217),
+  ('Factor -> Primary','Factor',1,'p_Factor','clase0206.py',223),
+  ('Factor -> UnaryOp Primary','Factor',2,'p_Factor','clase0206.py',224),
+  ('UnaryOp -> -','UnaryOp',1,'p_UnaryOp','clase0206.py',240),
+  ('UnaryOp -> !','UnaryOp',1,'p_UnaryOp','clase0206.py',241),
+  ('Primary -> INTLIT','Primary',1,'p_Primary_IntLit','clase0206.py',246),
+  ('Primary -> ID','Primary',1,'p_Primary_Id','clase0206.py',250),
 ]
