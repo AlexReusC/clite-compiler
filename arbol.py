@@ -51,6 +51,14 @@ class BinaryOp(ASTNode):
     def accept(self, visitor: Visitor):
         visitor.visit_binary_op(self)
 
+class Factor(ASTNode):
+    def __init__(self, value: str, type: str) -> None:
+        self.value = value
+        self.type = type
+
+    def accept(self, visitor: Visitor):
+        visitor.visit_factor(self)
+
 class Declaration(ASTNode):
     def __init__(self, name: str, type: str) -> None:
         self.name = name

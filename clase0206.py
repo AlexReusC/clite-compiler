@@ -1,10 +1,10 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements, Factor
 from llvmlite import ir
 
-literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',']
+literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
 reserved = {
     'else' : 'ELSE',
     'float' : 'FLOAT',
@@ -130,19 +130,44 @@ def p_Relation(p):
 
 def p_Addition(p):
     '''
-    Addition : Factor
+    Addition : Term
     '''
     p[0] = p[1]
 
-def p_Factor(p):
+def p_Term(p):
     '''
-    Factor : Primary
-           | Factor '*' Primary
+    Term : Factor
+         | Factor MulOp Primary
     '''
     if len(p) == 2:
         p[0] = p[1]
     else:
         p[0] = BinaryOp(p[2], p[1], p[3])
+
+def p_MulOp(p):
+    """
+    MulOp : '*'
+          | '/'
+          | '%'
+    """
+    p[0] = p[1]
+
+def p_Factor(p):
+    """
+    Factor : Primary
+           | UnaryOp Primary
+    """
+    #print("p", p[1], p[2])
+
+    if len(p) > 2 and p[1] == '-':
+        #p[2].value = -p[2].value
+        p[0] = p[2]
+    elif len(p) > 2 and p[1] == '!':
+        #p[0] = Factor(p[2], p[1])
+        p[0] = p[2]
+    else:
+        #p[0] = Factor(p[1], "")
+        p[0] = p[1]
 
 def p_UnaryOp(p):
     """
@@ -219,6 +244,17 @@ class IRGenerator(Visitor):
     def visit_variable(self, node: Variable) -> None:
         self.stack.append(self.builder.load(self.symbolTable[node.name]))
 
+    def visit_factor(self, node: Factor) -> None: #needs float
+
+        if node.type == '!':
+            #self.stack.append(self.builder.neg(node.value))
+            self.stack.append(intType(node.value))
+        elif node.type == '-':
+            pass
+            #self.stack.append(self.builder.neg(node.value))
+        else:
+            pass
+
     def visit_binary_op(self, node: BinaryOp) -> None:
         node.lhs.accept(self)
         node.rhs.accept(self)
@@ -243,16 +279,9 @@ builder = ir.IRBuilder(entry)
 
 data =  '''
         int main() {
-            int x;
-            int y;
             int z;
 
-            z = x;
-            
-            if (x < 10)
-                x = y * 5;
-            else
-                x = x * 7;
+            z = 2;
         }
         '''
 lexer = lex.lex()
