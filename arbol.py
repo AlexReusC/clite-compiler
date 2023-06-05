@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
+
 class ASTNode(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor) -> None:
@@ -49,6 +50,16 @@ class WhileStatement(ASTNode):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_while(self)
+
+class ForStatement(ASTNode):
+    def __init__(self, initial: Assignment, expression: Any, increment: Assignment, statement: Statement) -> None:
+        self.initial = initial 
+        self.expression = expression
+        self.increment = increment 
+        self.statement = statement
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_for(self)
 
 class BinaryOp(ASTNode):
     def __init__(self, op: str, lhs: ASTNode, rhs: ASTNode) -> None:

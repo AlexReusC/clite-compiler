@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements, Factor, WhileStatement
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
@@ -15,7 +15,8 @@ reserved = {
     'char' : 'CHAR',
     'main' : 'MAIN',
     'return' : 'RETURN',
-    'while' : 'WHILE'
+    'while' : 'WHILE',
+    'for': 'FOR'
 }
 
 tokens = list(reserved.values()) + ['ID', 'INTLIT', 'LTE', 'GTE', 'EQ', 'NEQ', 'AND', 'OR']
@@ -97,6 +98,7 @@ def p_Statement(p):
     Statement : Assignment
               | IfStatement
               | WhileStatement
+              | ForStatement
               | ';'
               | Block
     '''
@@ -119,6 +121,12 @@ def p_WhileStatement(p):
     WhileStatement : WHILE '(' Expression ')' Statement
     '''
     p[0] = WhileStatement(p[3], p[5])
+
+def p_ForStatement(p):
+    '''
+    ForStatement : FOR '(' Assignment Expression ';' Assignment ')' Statement
+    '''
+    p[0] = ForStatement(p[3], p[4], p[6], p[8])
 
 def p_Assignment(p):
     '''
@@ -252,6 +260,8 @@ def p_Primary_Id(p):
 # %%
 intType = ir.IntType(32)
 boolType = ir.IntType(32)
+floatType = ir.FloatType()
+charType = ir.IntType(32)
 
 class IRGenerator(Visitor):
     def __init__(self, builder):
@@ -299,12 +309,50 @@ class IRGenerator(Visitor):
         #after
         self.builder.position_at_start(afterwards)
 
+    def visit_for(self, node: ForStatement) -> None:
+       """
+       for(initial; expression; increment)
+        afterwards
+       """
+
+       expression_body = func.append_basic_block('expressionBody')
+       increment_body = func.append_basic_block('incrementBody')
+       statement_body = func.append_basic_block('statementBody') 
+       afterwards = func.append_basic_block('afterwards')
+
+       #initial
+       node.initial.accept(self)
+       #expresion
+       node.expression.accept(self)
+       expr = self.stack.pop()
+       self.builder.cbranch(expr, statement_body, afterwards)
+       #statement
+       self.builder.position_at_start(statement_body)
+       node.statement.accept(self)
+       #increment
+       self.builder.position_at_start(increment_body)
+       node.increment.accept(self)
+       #expresion
+       self.builder.position_at_start(expression_body)
+       node.expression.accept(self)
+       expr = self.stack.pop()
+       self.builder.cbranch(expr, statement_body, afterwards)
+       #after
+       self.builder.position_at_start(afterwards)
+
+
     def visit_declaration(self, node: Declaration) -> None:
         if node.type == 'INT':
             variable = self.builder.alloca(intType, name=node.name)
             self.symbolTable[node.name] = variable
         elif node.type == 'BOOL':
             variable = self.builder.alloca(boolType, name=node.name)
+            self.symbolTable[node.name] = variable
+        elif node.type == 'FLOAT':
+            variable = self.builder.alloca(floatType, name=node.name)
+            self.symbolTable[node.name] = variable
+        elif node.type == 'CHAR':
+            variable = self.builder.alloca(charType, name=node.name)
             self.symbolTable[node.name] = variable
 
     def visit_declarations(self, node: Declarations) -> None:
@@ -377,19 +425,18 @@ data =  '''
             int x;
             int y;
             bool t;
+            int i;
 
             t = 1;
-
             if (1 == 1 || 1 == 1 )
                 x = 1;
             else
                 x = 1;
-            
             x = 1;
+
+            for(i = 0 ; 1 > 1; i = i + 1;){
             
-            while(t){
                 x = 1;
-                x = 2;
             }
         }
         '''
