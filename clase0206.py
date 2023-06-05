@@ -123,7 +123,7 @@ def p_Conjunction(p):
 def p_Equality(p):
     '''
     Equality : Relation
-             | Equality EquOp Relation
+             | Relation EquOp Relation
     '''
     if len(p) > 2:
         p[0] = BinaryOp(p[2], p[1], p[3])
@@ -140,7 +140,7 @@ def p_EquOp(p):
 def p_Relation(p):
     '''
     Relation : Addition
-             | Relation EquOp Addition 
+             | Addition EquOp Addition 
     '''
     if len(p) > 2:
         p[0] = BinaryOp(p[2], p[1], p[3])
@@ -176,7 +176,7 @@ def p_AddOp(p):
 def p_Term(p):
     '''
     Term : Factor
-         | Factor MulOp Primary
+         | Term MulOp Primary
     '''
     if len(p) == 2:
         p[0] = p[1]
