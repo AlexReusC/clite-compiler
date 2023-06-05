@@ -118,20 +118,47 @@ def p_Equality(p):
     '''
     p[0] = p[1]
 
+def p_EquOp(p):
+    """
+    EquOp : EQ
+          | NEQ
+    """
+    p[0] = p[1]
+
 def p_Relation(p):
     '''
     Relation : Addition
-             | Relation '<' Addition 
+             | Relation RelOp Addition 
     '''
     if len(p) == 2:
         p[0] = p[1]
     else:
         p[0] = BinaryOp(p[2], p[1], p[3])
 
+def p_RelOp(p):
+    """
+    RelOp : '<'
+          | LTE
+          | '>'
+          | GTE
+    """
+    p[0] = p[1]
+
 def p_Addition(p):
-    '''
+    """
     Addition : Term
-    '''
+             | Addition AddOp Term
+    """
+    if len(p) > 2:
+        p[0] = BinaryOp(p[2], p[1], p[3])
+    else:
+        p[0] = p[1]
+
+def p_AddOp(p):
+    """
+    AddOp : '+'
+          | '-'
+    """
     p[0] = p[1]
 
 def p_Term(p):
@@ -262,9 +289,13 @@ class IRGenerator(Visitor):
         lhs = self.stack.pop()
         if node.op == '+':
             self.stack.append(self.builder.add(lhs, rhs))
+        elif node.op == '-':
+            self.stack.append(self.builder.sub(lhs, rhs))
         elif node.op == '*':
             self.stack.append(self.builder.mul(lhs, rhs))
-        elif node.op == '<':
+        elif node.op == '%':
+            self.stack.append(self.builder.srem(lhs, rhs))
+        elif node.op in ['<', '>', '>=', '<=']:
             self.stack.append(
                     self.builder.icmp_signed(node.op, lhs, rhs),
             )
@@ -279,9 +310,14 @@ builder = ir.IRBuilder(entry)
 
 data =  '''
         int main() {
-            int z;
+            int x;
+            int y;
 
-            z = 2;
+
+            if (x + 2 >= 10 + 2)
+                x = y * 5;
+            else
+                x = x * 7;
         }
         '''
 lexer = lex.lex()

@@ -3,11 +3,7 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 Unused terminals:
 
     AND
-    EQ
     FLOAT
-    GTE
-    LTE
-    NEQ
     OR
     RETURN
     WHILE
@@ -29,45 +25,56 @@ Rule 11    Assignment -> ID = Expression ;
 Rule 12    Expression -> Conjunction
 Rule 13    Conjunction -> Equality
 Rule 14    Equality -> Relation
-Rule 15    Relation -> Addition
-Rule 16    Relation -> Relation < Addition
-Rule 17    Addition -> Term
-Rule 18    Term -> Factor
-Rule 19    Term -> Factor MulOp Primary
-Rule 20    MulOp -> *
-Rule 21    MulOp -> /
-Rule 22    MulOp -> %
-Rule 23    Factor -> Primary
-Rule 24    Factor -> UnaryOp Primary
-Rule 25    UnaryOp -> -
-Rule 26    UnaryOp -> !
-Rule 27    Primary -> INTLIT
-Rule 28    Primary -> ID
+Rule 15    EquOp -> EQ
+Rule 16    EquOp -> NEQ
+Rule 17    Relation -> Addition
+Rule 18    Relation -> Relation RelOp Addition
+Rule 19    RelOp -> <
+Rule 20    RelOp -> LTE
+Rule 21    RelOp -> >
+Rule 22    RelOp -> GTE
+Rule 23    Addition -> Term
+Rule 24    Addition -> Addition AddOp Term
+Rule 25    AddOp -> +
+Rule 26    AddOp -> -
+Rule 27    Term -> Factor
+Rule 28    Term -> Factor MulOp Primary
+Rule 29    MulOp -> *
+Rule 30    MulOp -> /
+Rule 31    MulOp -> %
+Rule 32    Factor -> Primary
+Rule 33    Factor -> UnaryOp Primary
+Rule 34    UnaryOp -> -
+Rule 35    UnaryOp -> !
+Rule 36    Primary -> INTLIT
+Rule 37    Primary -> ID
 
 Terminals, with rules where they appear
 
-!                    : 26
-%                    : 22
+!                    : 35
+%                    : 31
 (                    : 1 10
 )                    : 1 10
-*                    : 20
--                    : 25
-/                    : 21
+*                    : 29
++                    : 25
+-                    : 26 34
+/                    : 30
 ;                    : 5 11
-<                    : 16
+<                    : 19
 =                    : 11
+>                    : 21
 AND                  : 
 ELSE                 : 10
-EQ                   : 
+EQ                   : 15
 FLOAT                : 
-GTE                  : 
-ID                   : 5 11 28
+GTE                  : 22
+ID                   : 5 11 37
 IF                   : 10
 INT                  : 1 5
-INTLIT               : 27
-LTE                  : 
+INTLIT               : 36
+LTE                  : 20
 MAIN                 : 1
-NEQ                  : 
+NEQ                  : 16
 OR                   : 
 RETURN               : 
 WHILE                : 
@@ -77,23 +84,26 @@ error                :
 
 Nonterminals, with rules where they appear
 
-Addition             : 15 16
+AddOp                : 24
+Addition             : 17 18 24
 Assignment           : 8
 Conjunction          : 12
 Declaration          : 3
 Declarations         : 1 3
+EquOp                : 
 Equality             : 13
 Expression           : 10 11
-Factor               : 18 19
+Factor               : 27 28
 IfStatement          : 9
-MulOp                : 19
-Primary              : 19 23 24
+MulOp                : 28
+Primary              : 28 32 33
 Program              : 0
-Relation             : 14 16
+RelOp                : 18
+Relation             : 14 18
 Statement            : 6 10 10
 Statements           : 1 6
-Term                 : 17
-UnaryOp              : 24
+Term                 : 23 24
+UnaryOp              : 33
 empty                : 4 7
 
 Parsing method: LALR
@@ -327,17 +337,18 @@ state 23
     (12) Expression -> . Conjunction
     (13) Conjunction -> . Equality
     (14) Equality -> . Relation
-    (15) Relation -> . Addition
-    (16) Relation -> . Relation < Addition
-    (17) Addition -> . Term
-    (18) Term -> . Factor
-    (19) Term -> . Factor MulOp Primary
-    (23) Factor -> . Primary
-    (24) Factor -> . UnaryOp Primary
-    (27) Primary -> . INTLIT
-    (28) Primary -> . ID
-    (25) UnaryOp -> . -
-    (26) UnaryOp -> . !
+    (17) Relation -> . Addition
+    (18) Relation -> . Relation RelOp Addition
+    (23) Addition -> . Term
+    (24) Addition -> . Addition AddOp Term
+    (27) Term -> . Factor
+    (28) Term -> . Factor MulOp Primary
+    (32) Factor -> . Primary
+    (33) Factor -> . UnaryOp Primary
+    (36) Primary -> . INTLIT
+    (37) Primary -> . ID
+    (34) UnaryOp -> . -
+    (35) UnaryOp -> . !
 
     INTLIT          shift and go to state 35
     ID              shift and go to state 25
@@ -360,17 +371,18 @@ state 24
     (12) Expression -> . Conjunction
     (13) Conjunction -> . Equality
     (14) Equality -> . Relation
-    (15) Relation -> . Addition
-    (16) Relation -> . Relation < Addition
-    (17) Addition -> . Term
-    (18) Term -> . Factor
-    (19) Term -> . Factor MulOp Primary
-    (23) Factor -> . Primary
-    (24) Factor -> . UnaryOp Primary
-    (27) Primary -> . INTLIT
-    (28) Primary -> . ID
-    (25) UnaryOp -> . -
-    (26) UnaryOp -> . !
+    (17) Relation -> . Addition
+    (18) Relation -> . Relation RelOp Addition
+    (23) Addition -> . Term
+    (24) Addition -> . Addition AddOp Term
+    (27) Term -> . Factor
+    (28) Term -> . Factor MulOp Primary
+    (32) Factor -> . Primary
+    (33) Factor -> . UnaryOp Primary
+    (36) Primary -> . INTLIT
+    (37) Primary -> . ID
+    (34) UnaryOp -> . -
+    (35) UnaryOp -> . !
 
     INTLIT          shift and go to state 35
     ID              shift and go to state 25
@@ -389,14 +401,19 @@ state 24
 
 state 25
 
-    (28) Primary -> ID .
+    (37) Primary -> ID .
 
-    *               reduce using rule 28 (Primary -> ID .)
-    /               reduce using rule 28 (Primary -> ID .)
-    %               reduce using rule 28 (Primary -> ID .)
-    <               reduce using rule 28 (Primary -> ID .)
-    ;               reduce using rule 28 (Primary -> ID .)
-    )               reduce using rule 28 (Primary -> ID .)
+    *               reduce using rule 37 (Primary -> ID .)
+    /               reduce using rule 37 (Primary -> ID .)
+    %               reduce using rule 37 (Primary -> ID .)
+    +               reduce using rule 37 (Primary -> ID .)
+    -               reduce using rule 37 (Primary -> ID .)
+    <               reduce using rule 37 (Primary -> ID .)
+    LTE             reduce using rule 37 (Primary -> ID .)
+    >               reduce using rule 37 (Primary -> ID .)
+    GTE             reduce using rule 37 (Primary -> ID .)
+    ;               reduce using rule 37 (Primary -> ID .)
+    )               reduce using rule 37 (Primary -> ID .)
 
 
 state 26
@@ -425,104 +442,141 @@ state 28
 state 29
 
     (14) Equality -> Relation .
-    (16) Relation -> Relation . < Addition
+    (18) Relation -> Relation . RelOp Addition
+    (19) RelOp -> . <
+    (20) RelOp -> . LTE
+    (21) RelOp -> . >
+    (22) RelOp -> . GTE
 
     ;               reduce using rule 14 (Equality -> Relation .)
     )               reduce using rule 14 (Equality -> Relation .)
-    <               shift and go to state 40
+    <               shift and go to state 41
+    LTE             shift and go to state 42
+    >               shift and go to state 43
+    GTE             shift and go to state 44
 
+    RelOp                          shift and go to state 40
 
 state 30
 
-    (15) Relation -> Addition .
+    (17) Relation -> Addition .
+    (24) Addition -> Addition . AddOp Term
+    (25) AddOp -> . +
+    (26) AddOp -> . -
 
-    <               reduce using rule 15 (Relation -> Addition .)
-    ;               reduce using rule 15 (Relation -> Addition .)
-    )               reduce using rule 15 (Relation -> Addition .)
+    <               reduce using rule 17 (Relation -> Addition .)
+    LTE             reduce using rule 17 (Relation -> Addition .)
+    >               reduce using rule 17 (Relation -> Addition .)
+    GTE             reduce using rule 17 (Relation -> Addition .)
+    ;               reduce using rule 17 (Relation -> Addition .)
+    )               reduce using rule 17 (Relation -> Addition .)
+    +               shift and go to state 46
+    -               shift and go to state 47
 
+    AddOp                          shift and go to state 45
 
 state 31
 
-    (17) Addition -> Term .
+    (23) Addition -> Term .
 
-    <               reduce using rule 17 (Addition -> Term .)
-    ;               reduce using rule 17 (Addition -> Term .)
-    )               reduce using rule 17 (Addition -> Term .)
+    +               reduce using rule 23 (Addition -> Term .)
+    -               reduce using rule 23 (Addition -> Term .)
+    <               reduce using rule 23 (Addition -> Term .)
+    LTE             reduce using rule 23 (Addition -> Term .)
+    >               reduce using rule 23 (Addition -> Term .)
+    GTE             reduce using rule 23 (Addition -> Term .)
+    ;               reduce using rule 23 (Addition -> Term .)
+    )               reduce using rule 23 (Addition -> Term .)
 
 
 state 32
 
-    (18) Term -> Factor .
-    (19) Term -> Factor . MulOp Primary
-    (20) MulOp -> . *
-    (21) MulOp -> . /
-    (22) MulOp -> . %
+    (27) Term -> Factor .
+    (28) Term -> Factor . MulOp Primary
+    (29) MulOp -> . *
+    (30) MulOp -> . /
+    (31) MulOp -> . %
 
-    <               reduce using rule 18 (Term -> Factor .)
-    ;               reduce using rule 18 (Term -> Factor .)
-    )               reduce using rule 18 (Term -> Factor .)
-    *               shift and go to state 42
-    /               shift and go to state 43
-    %               shift and go to state 44
+    +               reduce using rule 27 (Term -> Factor .)
+    -               reduce using rule 27 (Term -> Factor .)
+    <               reduce using rule 27 (Term -> Factor .)
+    LTE             reduce using rule 27 (Term -> Factor .)
+    >               reduce using rule 27 (Term -> Factor .)
+    GTE             reduce using rule 27 (Term -> Factor .)
+    ;               reduce using rule 27 (Term -> Factor .)
+    )               reduce using rule 27 (Term -> Factor .)
+    *               shift and go to state 49
+    /               shift and go to state 50
+    %               shift and go to state 51
 
-    MulOp                          shift and go to state 41
+    MulOp                          shift and go to state 48
 
 state 33
 
-    (23) Factor -> Primary .
+    (32) Factor -> Primary .
 
-    *               reduce using rule 23 (Factor -> Primary .)
-    /               reduce using rule 23 (Factor -> Primary .)
-    %               reduce using rule 23 (Factor -> Primary .)
-    <               reduce using rule 23 (Factor -> Primary .)
-    ;               reduce using rule 23 (Factor -> Primary .)
-    )               reduce using rule 23 (Factor -> Primary .)
+    *               reduce using rule 32 (Factor -> Primary .)
+    /               reduce using rule 32 (Factor -> Primary .)
+    %               reduce using rule 32 (Factor -> Primary .)
+    +               reduce using rule 32 (Factor -> Primary .)
+    -               reduce using rule 32 (Factor -> Primary .)
+    <               reduce using rule 32 (Factor -> Primary .)
+    LTE             reduce using rule 32 (Factor -> Primary .)
+    >               reduce using rule 32 (Factor -> Primary .)
+    GTE             reduce using rule 32 (Factor -> Primary .)
+    ;               reduce using rule 32 (Factor -> Primary .)
+    )               reduce using rule 32 (Factor -> Primary .)
 
 
 state 34
 
-    (24) Factor -> UnaryOp . Primary
-    (27) Primary -> . INTLIT
-    (28) Primary -> . ID
+    (33) Factor -> UnaryOp . Primary
+    (36) Primary -> . INTLIT
+    (37) Primary -> . ID
 
     INTLIT          shift and go to state 35
     ID              shift and go to state 25
 
-    Primary                        shift and go to state 45
+    Primary                        shift and go to state 52
 
 state 35
 
-    (27) Primary -> INTLIT .
+    (36) Primary -> INTLIT .
 
-    *               reduce using rule 27 (Primary -> INTLIT .)
-    /               reduce using rule 27 (Primary -> INTLIT .)
-    %               reduce using rule 27 (Primary -> INTLIT .)
-    <               reduce using rule 27 (Primary -> INTLIT .)
-    ;               reduce using rule 27 (Primary -> INTLIT .)
-    )               reduce using rule 27 (Primary -> INTLIT .)
+    *               reduce using rule 36 (Primary -> INTLIT .)
+    /               reduce using rule 36 (Primary -> INTLIT .)
+    %               reduce using rule 36 (Primary -> INTLIT .)
+    +               reduce using rule 36 (Primary -> INTLIT .)
+    -               reduce using rule 36 (Primary -> INTLIT .)
+    <               reduce using rule 36 (Primary -> INTLIT .)
+    LTE             reduce using rule 36 (Primary -> INTLIT .)
+    >               reduce using rule 36 (Primary -> INTLIT .)
+    GTE             reduce using rule 36 (Primary -> INTLIT .)
+    ;               reduce using rule 36 (Primary -> INTLIT .)
+    )               reduce using rule 36 (Primary -> INTLIT .)
 
 
 state 36
 
-    (25) UnaryOp -> - .
+    (34) UnaryOp -> - .
 
-    INTLIT          reduce using rule 25 (UnaryOp -> - .)
-    ID              reduce using rule 25 (UnaryOp -> - .)
+    INTLIT          reduce using rule 34 (UnaryOp -> - .)
+    ID              reduce using rule 34 (UnaryOp -> - .)
 
 
 state 37
 
-    (26) UnaryOp -> ! .
+    (35) UnaryOp -> ! .
 
-    INTLIT          reduce using rule 26 (UnaryOp -> ! .)
-    ID              reduce using rule 26 (UnaryOp -> ! .)
+    INTLIT          reduce using rule 35 (UnaryOp -> ! .)
+    ID              reduce using rule 35 (UnaryOp -> ! .)
 
 
 state 38
 
     (10) IfStatement -> IF ( Expression . ) Statement ELSE Statement
 
-    )               shift and go to state 46
+    )               shift and go to state 53
 
 
 state 39
@@ -537,23 +591,24 @@ state 39
 
 state 40
 
-    (16) Relation -> Relation < . Addition
-    (17) Addition -> . Term
-    (18) Term -> . Factor
-    (19) Term -> . Factor MulOp Primary
-    (23) Factor -> . Primary
-    (24) Factor -> . UnaryOp Primary
-    (27) Primary -> . INTLIT
-    (28) Primary -> . ID
-    (25) UnaryOp -> . -
-    (26) UnaryOp -> . !
+    (18) Relation -> Relation RelOp . Addition
+    (23) Addition -> . Term
+    (24) Addition -> . Addition AddOp Term
+    (27) Term -> . Factor
+    (28) Term -> . Factor MulOp Primary
+    (32) Factor -> . Primary
+    (33) Factor -> . UnaryOp Primary
+    (36) Primary -> . INTLIT
+    (37) Primary -> . ID
+    (34) UnaryOp -> . -
+    (35) UnaryOp -> . !
 
     INTLIT          shift and go to state 35
     ID              shift and go to state 25
     -               shift and go to state 36
     !               shift and go to state 37
 
-    Addition                       shift and go to state 47
+    Addition                       shift and go to state 54
     Term                           shift and go to state 31
     Factor                         shift and go to state 32
     Primary                        shift and go to state 33
@@ -561,52 +616,139 @@ state 40
 
 state 41
 
-    (19) Term -> Factor MulOp . Primary
-    (27) Primary -> . INTLIT
-    (28) Primary -> . ID
+    (19) RelOp -> < .
 
-    INTLIT          shift and go to state 35
-    ID              shift and go to state 25
+    INTLIT          reduce using rule 19 (RelOp -> < .)
+    ID              reduce using rule 19 (RelOp -> < .)
+    -               reduce using rule 19 (RelOp -> < .)
+    !               reduce using rule 19 (RelOp -> < .)
 
-    Primary                        shift and go to state 48
 
 state 42
 
-    (20) MulOp -> * .
+    (20) RelOp -> LTE .
 
-    INTLIT          reduce using rule 20 (MulOp -> * .)
-    ID              reduce using rule 20 (MulOp -> * .)
+    INTLIT          reduce using rule 20 (RelOp -> LTE .)
+    ID              reduce using rule 20 (RelOp -> LTE .)
+    -               reduce using rule 20 (RelOp -> LTE .)
+    !               reduce using rule 20 (RelOp -> LTE .)
 
 
 state 43
 
-    (21) MulOp -> / .
+    (21) RelOp -> > .
 
-    INTLIT          reduce using rule 21 (MulOp -> / .)
-    ID              reduce using rule 21 (MulOp -> / .)
+    INTLIT          reduce using rule 21 (RelOp -> > .)
+    ID              reduce using rule 21 (RelOp -> > .)
+    -               reduce using rule 21 (RelOp -> > .)
+    !               reduce using rule 21 (RelOp -> > .)
 
 
 state 44
 
-    (22) MulOp -> % .
+    (22) RelOp -> GTE .
 
-    INTLIT          reduce using rule 22 (MulOp -> % .)
-    ID              reduce using rule 22 (MulOp -> % .)
+    INTLIT          reduce using rule 22 (RelOp -> GTE .)
+    ID              reduce using rule 22 (RelOp -> GTE .)
+    -               reduce using rule 22 (RelOp -> GTE .)
+    !               reduce using rule 22 (RelOp -> GTE .)
 
 
 state 45
 
-    (24) Factor -> UnaryOp Primary .
+    (24) Addition -> Addition AddOp . Term
+    (27) Term -> . Factor
+    (28) Term -> . Factor MulOp Primary
+    (32) Factor -> . Primary
+    (33) Factor -> . UnaryOp Primary
+    (36) Primary -> . INTLIT
+    (37) Primary -> . ID
+    (34) UnaryOp -> . -
+    (35) UnaryOp -> . !
 
-    *               reduce using rule 24 (Factor -> UnaryOp Primary .)
-    /               reduce using rule 24 (Factor -> UnaryOp Primary .)
-    %               reduce using rule 24 (Factor -> UnaryOp Primary .)
-    <               reduce using rule 24 (Factor -> UnaryOp Primary .)
-    ;               reduce using rule 24 (Factor -> UnaryOp Primary .)
-    )               reduce using rule 24 (Factor -> UnaryOp Primary .)
+    INTLIT          shift and go to state 35
+    ID              shift and go to state 25
+    -               shift and go to state 36
+    !               shift and go to state 37
 
+    Term                           shift and go to state 55
+    Factor                         shift and go to state 32
+    Primary                        shift and go to state 33
+    UnaryOp                        shift and go to state 34
 
 state 46
+
+    (25) AddOp -> + .
+
+    INTLIT          reduce using rule 25 (AddOp -> + .)
+    ID              reduce using rule 25 (AddOp -> + .)
+    -               reduce using rule 25 (AddOp -> + .)
+    !               reduce using rule 25 (AddOp -> + .)
+
+
+state 47
+
+    (26) AddOp -> - .
+
+    INTLIT          reduce using rule 26 (AddOp -> - .)
+    ID              reduce using rule 26 (AddOp -> - .)
+    -               reduce using rule 26 (AddOp -> - .)
+    !               reduce using rule 26 (AddOp -> - .)
+
+
+state 48
+
+    (28) Term -> Factor MulOp . Primary
+    (36) Primary -> . INTLIT
+    (37) Primary -> . ID
+
+    INTLIT          shift and go to state 35
+    ID              shift and go to state 25
+
+    Primary                        shift and go to state 56
+
+state 49
+
+    (29) MulOp -> * .
+
+    INTLIT          reduce using rule 29 (MulOp -> * .)
+    ID              reduce using rule 29 (MulOp -> * .)
+
+
+state 50
+
+    (30) MulOp -> / .
+
+    INTLIT          reduce using rule 30 (MulOp -> / .)
+    ID              reduce using rule 30 (MulOp -> / .)
+
+
+state 51
+
+    (31) MulOp -> % .
+
+    INTLIT          reduce using rule 31 (MulOp -> % .)
+    ID              reduce using rule 31 (MulOp -> % .)
+
+
+state 52
+
+    (33) Factor -> UnaryOp Primary .
+
+    *               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    /               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    %               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    +               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    -               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    <               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    LTE             reduce using rule 33 (Factor -> UnaryOp Primary .)
+    >               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    GTE             reduce using rule 33 (Factor -> UnaryOp Primary .)
+    ;               reduce using rule 33 (Factor -> UnaryOp Primary .)
+    )               reduce using rule 33 (Factor -> UnaryOp Primary .)
+
+
+state 53
 
     (10) IfStatement -> IF ( Expression ) . Statement ELSE Statement
     (8) Statement -> . Assignment
@@ -617,36 +759,64 @@ state 46
     ID              shift and go to state 17
     IF              shift and go to state 18
 
-    Statement                      shift and go to state 49
+    Statement                      shift and go to state 57
     Assignment                     shift and go to state 15
     IfStatement                    shift and go to state 16
 
-state 47
+state 54
 
-    (16) Relation -> Relation < Addition .
+    (18) Relation -> Relation RelOp Addition .
+    (24) Addition -> Addition . AddOp Term
+    (25) AddOp -> . +
+    (26) AddOp -> . -
 
-    <               reduce using rule 16 (Relation -> Relation < Addition .)
-    ;               reduce using rule 16 (Relation -> Relation < Addition .)
-    )               reduce using rule 16 (Relation -> Relation < Addition .)
+    <               reduce using rule 18 (Relation -> Relation RelOp Addition .)
+    LTE             reduce using rule 18 (Relation -> Relation RelOp Addition .)
+    >               reduce using rule 18 (Relation -> Relation RelOp Addition .)
+    GTE             reduce using rule 18 (Relation -> Relation RelOp Addition .)
+    ;               reduce using rule 18 (Relation -> Relation RelOp Addition .)
+    )               reduce using rule 18 (Relation -> Relation RelOp Addition .)
+    +               shift and go to state 46
+    -               shift and go to state 47
+
+    AddOp                          shift and go to state 45
+
+state 55
+
+    (24) Addition -> Addition AddOp Term .
+
+    +               reduce using rule 24 (Addition -> Addition AddOp Term .)
+    -               reduce using rule 24 (Addition -> Addition AddOp Term .)
+    <               reduce using rule 24 (Addition -> Addition AddOp Term .)
+    LTE             reduce using rule 24 (Addition -> Addition AddOp Term .)
+    >               reduce using rule 24 (Addition -> Addition AddOp Term .)
+    GTE             reduce using rule 24 (Addition -> Addition AddOp Term .)
+    ;               reduce using rule 24 (Addition -> Addition AddOp Term .)
+    )               reduce using rule 24 (Addition -> Addition AddOp Term .)
 
 
-state 48
+state 56
 
-    (19) Term -> Factor MulOp Primary .
+    (28) Term -> Factor MulOp Primary .
 
-    <               reduce using rule 19 (Term -> Factor MulOp Primary .)
-    ;               reduce using rule 19 (Term -> Factor MulOp Primary .)
-    )               reduce using rule 19 (Term -> Factor MulOp Primary .)
+    +               reduce using rule 28 (Term -> Factor MulOp Primary .)
+    -               reduce using rule 28 (Term -> Factor MulOp Primary .)
+    <               reduce using rule 28 (Term -> Factor MulOp Primary .)
+    LTE             reduce using rule 28 (Term -> Factor MulOp Primary .)
+    >               reduce using rule 28 (Term -> Factor MulOp Primary .)
+    GTE             reduce using rule 28 (Term -> Factor MulOp Primary .)
+    ;               reduce using rule 28 (Term -> Factor MulOp Primary .)
+    )               reduce using rule 28 (Term -> Factor MulOp Primary .)
 
 
-state 49
+state 57
 
     (10) IfStatement -> IF ( Expression ) Statement . ELSE Statement
 
-    ELSE            shift and go to state 50
+    ELSE            shift and go to state 58
 
 
-state 50
+state 58
 
     (10) IfStatement -> IF ( Expression ) Statement ELSE . Statement
     (8) Statement -> . Assignment
@@ -657,11 +827,11 @@ state 50
     ID              shift and go to state 17
     IF              shift and go to state 18
 
-    Statement                      shift and go to state 51
+    Statement                      shift and go to state 59
     Assignment                     shift and go to state 15
     IfStatement                    shift and go to state 16
 
-state 51
+state 59
 
     (10) IfStatement -> IF ( Expression ) Statement ELSE Statement .
 
