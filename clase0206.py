@@ -103,20 +103,32 @@ def p_Assignment(p):
 def p_Expression(p):
     '''
     Expression : Conjunction
+               | Expression OR Conjunction
     '''
-    p[0] = p[1]
+    if len(p) > 2:
+        p[0] = BinaryOp(p[2], p[1], p[3])
+    else:
+        p[0] = p[1]
 
 def p_Conjunction(p):
     '''
     Conjunction : Equality
+                | Conjunction AND Equality
     '''
-    p[0] = p[1]
+    if len(p) > 2:
+        p[0] = BinaryOp(p[2], p[1], p[3])
+    else:
+        p[0] = p[1]
 
 def p_Equality(p):
     '''
     Equality : Relation
+             | Equality EquOp Relation
     '''
-    p[0] = p[1]
+    if len(p) > 2:
+        p[0] = BinaryOp(p[2], p[1], p[3])
+    else:
+        p[0] = p[1]
 
 def p_EquOp(p):
     """
@@ -128,12 +140,12 @@ def p_EquOp(p):
 def p_Relation(p):
     '''
     Relation : Addition
-             | Relation RelOp Addition 
+             | Relation EquOp Addition 
     '''
-    if len(p) == 2:
-        p[0] = p[1]
-    else:
+    if len(p) > 2:
         p[0] = BinaryOp(p[2], p[1], p[3])
+    else:
+        p[0] = p[1]
 
 def p_RelOp(p):
     """
@@ -295,10 +307,14 @@ class IRGenerator(Visitor):
             self.stack.append(self.builder.mul(lhs, rhs))
         elif node.op == '%':
             self.stack.append(self.builder.srem(lhs, rhs))
-        elif node.op in ['<', '>', '>=', '<=']:
+        elif node.op in ['<', '>', '>=', '<=', '==', '!=']:
             self.stack.append(
                     self.builder.icmp_signed(node.op, lhs, rhs),
             )
+        elif node.op == '&&':
+            self.stack.append(self.builder.and_(lhs, rhs))
+        elif node.op == '||':
+            self.stack.append(self.builder.or_(lhs, rhs))
 
 module = ir.Module(name="prog")
 
@@ -314,7 +330,7 @@ data =  '''
             int y;
 
 
-            if (x + 2 >= 10 + 2)
+            if (1 == 1 || 1 == 1 )
                 x = y * 5;
             else
                 x = x * 7;
