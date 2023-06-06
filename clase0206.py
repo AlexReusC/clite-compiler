@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Program, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
@@ -52,9 +52,15 @@ def t_error(t):
 # ========================
 def p_Program(p):
     '''
-    Program : INT MAIN '(' ')' '{' Declarations Statements '}'
+    Program : Function
     '''
-    p[0] = Program( p[6], p[7] )
+    p[0] = p[1]
+
+def p_Function(p):
+    '''
+    Function : INT MAIN '(' ')' '{' Declarations Statements '}'
+    '''
+    p[0] = Function( p[6], p[7] )
 
 def p_empty(p):
     '''
@@ -264,36 +270,55 @@ floatType = ir.FloatType()
 charType = ir.IntType(32)
 
 class IRGenerator(Visitor):
-    def __init__(self, builder):
+    def __init__(self, module):
         self.stack = []
         self.symbolTable = dict()
-        self.builder = builder
+        self.builder = None
+        self.func = None
+        self.module = module
 
-    def visit_program(self, node: Program) -> None:
+    def visit_function(self, node: Function) -> None:
+        fnty = ir.FunctionType(intType, [])
+        self.func = ir.Function(self.module, fnty, name="main")
+        entry = self.func.append_basic_block('entry')
+        self.builder = ir.IRBuilder(entry)
+
         node.decls.accept(self)
         node.stats.accept(self)
 
+        one_constant = ir.Constant(intType, 1)
+        f_var = self.builder.alloca(intType, name="f")
+        self.builder.store(one_constant, f_var)
+
+        tmp = self.builder.load(f_var)
+        self.builder.ret(tmp)
+
+
+
+
     def visit_if_else(self, node: IfElse) -> None:
-        thenPart = func.append_basic_block('thenPart')
-        elsePart = func.append_basic_block('elsePart')
-        afterwards = func.append_basic_block('afterwards')
+        thenPart = self.func.append_basic_block('thenPart')
+        elsePart = self.func.append_basic_block('elsePart')
+        afterwards = self.func.append_basic_block('afterwards')
         node.expr.accept(self)
         expr = self.stack.pop()
-        builder.cbranch(expr, thenPart, elsePart)
+        self.builder.cbranch(expr, thenPart, elsePart)
 
         # Then
         self.builder.position_at_start(thenPart)
         node.thenSt.accept(self)
+        self.builder.branch(afterwards)
 
         # Else
         self.builder.position_at_start(elsePart)
         node.elseSt.accept(self)
+        self.builder.branch(afterwards)
 
         self.builder.position_at_start(afterwards)
 
     def visit_while(self, node: WhileStatement) -> None:
-        while_body = func.append_basic_block('whileBody')
-        afterwards = func.append_basic_block('afterwards')
+        while_body = self.func.append_basic_block('whileBody')
+        afterwards = self.func.append_basic_block('afterwards')
 
         node.expr.accept(self)
         expr = self.stack.pop()
@@ -312,13 +337,14 @@ class IRGenerator(Visitor):
     def visit_for(self, node: ForStatement) -> None:
        """
        for(initial; expression; increment)
-        afterwards
+       statement
+       afterwards 
        """
 
-       expression_body = func.append_basic_block('expressionBody')
-       increment_body = func.append_basic_block('incrementBody')
-       statement_body = func.append_basic_block('statementBody') 
-       afterwards = func.append_basic_block('afterwards')
+       expression_body = self.func.append_basic_block('expressionBody')
+       increment_body = self.func.append_basic_block('incrementBody')
+       statement_body = self.func.append_basic_block('statementBody') 
+       afterwards = self.func.append_basic_block('afterwards')
 
        #initial
        node.initial.accept(self)
@@ -329,9 +355,11 @@ class IRGenerator(Visitor):
        #statement
        self.builder.position_at_start(statement_body)
        node.statement.accept(self)
+       self.builder.branch(increment_body)
        #increment
        self.builder.position_at_start(increment_body)
        node.increment.accept(self)
+       self.builder.branch(expression_body)
        #expresion
        self.builder.position_at_start(expression_body)
        node.expression.accept(self)
@@ -414,12 +442,6 @@ class IRGenerator(Visitor):
 
 module = ir.Module(name="prog")
 
-fnty = ir.FunctionType(intType, [])
-func = ir.Function(module, fnty, name='main')
-
-entry = func.append_basic_block('entry')
-builder = ir.IRBuilder(entry)
-
 data =  '''
         int main() {
             int x;
@@ -428,16 +450,18 @@ data =  '''
             int i;
 
             t = 1;
+
             if (1 == 1 || 1 == 1 )
                 x = 1;
             else
                 x = 1;
             x = 1;
-
             for(i = 0 ; 1 > 1; i = i + 1;){
-            
+                x = 2;
                 x = 1;
             }
+
+
         }
         '''
 lexer = lex.lex()
@@ -445,10 +469,25 @@ parser = yacc.yacc()
 ast = parser.parse(data)
 print(ast)
 
-visitor = IRGenerator(builder)
+visitor = IRGenerator(module)
 ast.accept(visitor)
 # builder.ret(visitor.stack.pop())
 
 print(module)
+
+
+
+import runtime as rt
+from ctypes import CFUNCTYPE, c_int
+
+engine = rt.create_execution_engine()
+mod = rt.compile_ir(engine, str(module))
+func_ptr = engine.get_function_address("main")
+
+cfunc = CFUNCTYPE(c_int)(func_ptr)
+res = cfunc()
+print(res)
+
+
 
 # %%

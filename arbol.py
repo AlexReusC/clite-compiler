@@ -9,13 +9,13 @@ class ASTNode(ABC):
     def accept(self, visitor: Visitor) -> None:
         pass
 
-class Program(ASTNode):
+class Function(ASTNode):
     def __init__(self, decls: Any, stats: Any) -> None:
         self.decls = decls
         self.stats = stats
 
     def accept(self, visitor: Visitor):
-        visitor.visit_program(self)
+        visitor.visit_function(self)
 
 class Literal(ASTNode):
     def __init__(self, value: Any, type: str) -> None:
