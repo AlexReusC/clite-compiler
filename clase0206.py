@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement, ReturnStatement
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement, ReturnStatement, Program
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
@@ -52,9 +52,11 @@ def t_error(t):
 # ========================
 def p_Program(p):
     '''
-    Program : Function
+    Program : Function Program
+            | empty
     '''
-    p[0] = p[1]
+    if len(p) > 2:
+        p[0] = Program(p[1], p[2])
 
 def p_Function(p):
     '''
@@ -283,6 +285,11 @@ class IRGenerator(Visitor):
         self.builder = None
         self.func = None
         self.module = module
+        
+    def visit_program(self, node: Program) -> None:
+        node.function.accept(self)
+        if node.program != None:
+            node.program.accept(self)
 
     def visit_function(self, node: Function) -> None:
         fnty = ir.FunctionType(intType, [])
@@ -453,6 +460,7 @@ data =  '''
             int x;
 
             x = 1;
+            return x;
         }
 
         int main() {

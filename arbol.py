@@ -3,10 +3,19 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
+
 class ASTNode(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor) -> None:
         pass
+
+class Program(ASTNode):
+    def __init__(self, function: Function, program: Program) -> None:
+        self.function = function
+        self.program = program
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_program(self)
 
 class Function(ASTNode):
     def __init__(self, name: str, decls: Any, stats: Any, return_statement: ReturnStatement) -> None:
