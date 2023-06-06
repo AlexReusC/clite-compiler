@@ -50,6 +50,12 @@ class Variable(ASTNode):
     def accept(self, visitor: Visitor):
         visitor.visit_variable(self)
 
+class FunctionCall(ASTNode):
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def accept(self, visitor: Visitor):
+        visitor.visit_function_call(self)
 
 class IfElse(ASTNode):
     def __init__(self, expr: Any, thenSt: Any, elseSt: Any) -> None:

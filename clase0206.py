@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement, ReturnStatement, Program
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement, ReturnStatement, Program, FunctionCall
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
@@ -272,6 +272,12 @@ def p_Primary_Id(p):
     'Primary : ID'
     p[0] = Variable(p[1], 'INT')
 
+def p_Primary_FunctionCall(p):
+    """
+    Primary : ID '(' ')'
+    """
+    p[0] = FunctionCall(p[1])
+
 # %%
 intType = ir.IntType(32)
 boolType = ir.IntType(32)
@@ -282,6 +288,7 @@ class IRGenerator(Visitor):
     def __init__(self, module):
         self.stack = []
         self.symbolTable = dict()
+        self.symbolFunc = dict()
         self.builder = None
         self.func = None
         self.module = module
@@ -294,6 +301,7 @@ class IRGenerator(Visitor):
     def visit_function(self, node: Function) -> None:
         fnty = ir.FunctionType(intType, [])
         self.func = ir.Function(self.module, fnty, name=node.name)
+        self.symbolFunc[node.name] = self.func
         entry = self.func.append_basic_block('entry')
         self.builder = ir.IRBuilder(entry)
 
@@ -420,6 +428,9 @@ class IRGenerator(Visitor):
     def visit_variable(self, node: Variable) -> None:
         self.stack.append(self.builder.load(self.symbolTable[node.name]))
 
+    def visit_function_call(self, node: FunctionCall) -> None:
+        self.stack.append(self.builder.call(self.symbolFunc[node.name], []))
+
     def visit_factor(self, node: Factor) -> None: #needs float
 
         if node.type == '!':
@@ -458,8 +469,14 @@ module = ir.Module(name="prog")
 data =  '''
         int fact() {
             int x;
+            int i;
 
             x = 1;
+            i = 1;
+            while(i <= 5){
+                x = x * i;
+                i = i + 1;
+            }
             return x;
         }
 
@@ -481,7 +498,9 @@ data =  '''
                 x = 1;
             }
 
-            return 0;
+            y = fact();
+
+            return y;
         }
         '''
 lexer = lex.lex()
