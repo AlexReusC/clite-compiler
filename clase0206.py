@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement, ReturnStatement
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
@@ -13,10 +13,10 @@ reserved = {
     'bool' : 'BOOL',
     'float' : 'FLOAT',
     'char' : 'CHAR',
-    'main' : 'MAIN',
     'return' : 'RETURN',
     'while' : 'WHILE',
-    'for': 'FOR'
+    'for': 'FOR',
+    'return': 'RETURN'
 }
 
 tokens = list(reserved.values()) + ['ID', 'INTLIT', 'LTE', 'GTE', 'EQ', 'NEQ', 'AND', 'OR']
@@ -58,9 +58,16 @@ def p_Program(p):
 
 def p_Function(p):
     '''
-    Function : INT MAIN '(' ')' '{' Declarations Statements '}'
+    Function : Type ID '(' ')' '{' Declarations Statements ReturnStatement '}'
     '''
-    p[0] = Function( p[6], p[7] )
+    p[0] = Function(p[2], p[6], p[7], p[8])
+
+def p_ReturnStatement(p):
+    '''
+    ReturnStatement : RETURN Expression ';'
+    '''
+    print("p", p[2])
+    p[0] = ReturnStatement(p[2])
 
 def p_empty(p):
     '''
@@ -279,21 +286,20 @@ class IRGenerator(Visitor):
 
     def visit_function(self, node: Function) -> None:
         fnty = ir.FunctionType(intType, [])
-        self.func = ir.Function(self.module, fnty, name="main")
+        self.func = ir.Function(self.module, fnty, name=node.name)
         entry = self.func.append_basic_block('entry')
         self.builder = ir.IRBuilder(entry)
 
         node.decls.accept(self)
         node.stats.accept(self)
 
-        one_constant = ir.Constant(intType, 1)
-        f_var = self.builder.alloca(intType, name="f")
-        self.builder.store(one_constant, f_var)
+        node.returnStatement.accept(self)
 
-        tmp = self.builder.load(f_var)
+
+    def visit_return_statement(self, node: ReturnStatement) -> None:
+        node.expression.accept(self)
+        tmp = self.stack.pop()
         self.builder.ret(tmp)
-
-
 
 
     def visit_if_else(self, node: IfElse) -> None:
@@ -443,6 +449,12 @@ class IRGenerator(Visitor):
 module = ir.Module(name="prog")
 
 data =  '''
+        int fact() {
+            int x;
+
+            x = 1;
+        }
+
         int main() {
             int x;
             int y;
@@ -461,7 +473,7 @@ data =  '''
                 x = 1;
             }
 
-
+            return 0;
         }
         '''
 lexer = lex.lex()

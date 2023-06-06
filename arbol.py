@@ -3,19 +3,27 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-
 class ASTNode(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor) -> None:
         pass
 
 class Function(ASTNode):
-    def __init__(self, decls: Any, stats: Any) -> None:
+    def __init__(self, name: str, decls: Any, stats: Any, return_statement: ReturnStatement) -> None:
+        self.name = name
         self.decls = decls
         self.stats = stats
+        self.returnStatement = return_statement
 
     def accept(self, visitor: Visitor):
         visitor.visit_function(self)
+
+class ReturnStatement(ASTNode):
+    def __init__(self, expression: Any):
+        self.expression = expression
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_return_statement(self)
 
 class Literal(ASTNode):
     def __init__(self, value: Any, type: str) -> None:
