@@ -1,7 +1,7 @@
 # %%
 import ply.lex as lex
 import ply.yacc as yacc
-from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement, ReturnStatement, Program, FunctionCall
+from arbol import Literal, Variable, Visitor, BinaryOp, Declaration, Declarations, Assignment, Function, IfElse, Statement, Statements, Factor, WhileStatement, ForStatement, ReturnStatement, Program, FunctionCall, Param, Params
 from llvmlite import ir
 
 literals = ['+','-','*','/', '%', '(', ')', '{', '}', '<', '>', '=', ';', ',', '!']
@@ -62,8 +62,28 @@ def p_Program(p):
 def p_Function(p):
     '''
     Function : FunctionReturnType ID '(' ')' '{' Declarations Statements ReturnStatement '}'
+             | FunctionReturnType ID '(' Params ')' '{' Declarations Statements ReturnStatement '}'
     '''
-    p[0] = Function(p[1], p[2], p[6], p[7], p[8])
+    if len(p) > 10:
+        p[0] = Function(p[1], p[2], p[4], p[7], p[8], p[9])
+    else:
+        p[0] = Function(p[1], p[2], False, p[6], p[7], p[8])
+
+def p_Params(p):
+    '''
+    Params : Param Params
+           | empty
+    '''
+    if len(p) > 2:
+        p[0] = Params(p[1], p[2])
+
+
+def p_Param(p):
+    '''
+    Param : Type ID
+    '''
+    p[0] = Param(p[1], p[2])
+
 
 def p_ReturnStatement(p):
     '''
@@ -256,7 +276,6 @@ def p_Factor(p):
     Factor : Primary
            | UnaryOp Primary
     """
-    #print("p", p[1], p[2])
 
     if len(p) > 2 and p[1] == '-':
         p[0] = p[2]
@@ -283,8 +302,12 @@ def p_Primary_Id(p):
 def p_Primary_FunctionCall(p):
     """
     Primary : ID '(' ')'
+            | ID '(' Primary ')'
     """
-    p[0] = FunctionCall(p[1])
+    if len(p) > 4:
+        p[0] = FunctionCall(p[1], p[3])
+    else:
+        p[0] = FunctionCall(p[1], False)
 
 # %%
 intType = ir.IntType(32)
@@ -297,7 +320,8 @@ class IRGenerator(Visitor):
     def __init__(self, module):
         self.stack = []
         self.symbolTable = dict()
-        self.symbolFunc = dict()
+        self.funcTable = dict()
+        self.paramsTable = dict()
         self.builder = None
         self.func = None
         self.module = module
@@ -311,14 +335,47 @@ class IRGenerator(Visitor):
         return_type = None
         if node.functionReturnType == "int":
             return_type = intType
+        elif node.functionReturnType == "char":
+            return_type = charType
+        elif node.functionReturnType == "float":
+            return_type = floatType
+        elif node.functionReturnType == "bool":
+            return_type = boolType
         else:
-            return_type = voidType 
+            return_type = voidType
 
-        fnty = ir.FunctionType(return_type, [])
+        params = []
+        if node.params:
+            tmp = node.params
+            params_objs = []
+            while tmp != None:
+                params_objs.append(tmp.param)
+                tmp = tmp.params
+
+            param_types = [param.type for param in params_objs]
+            for x in param_types:
+                if x == 'int':
+                    params.append(intType)
+                elif x == 'bool':
+                    params.append(boolType)
+                elif x == 'float':
+                    params.append(floatType)
+                elif x == 'char':
+                    params.append(charType)
+
+        fnty = ir.FunctionType(return_type, params)
         self.func = ir.Function(self.module, fnty, name=node.name)
-        self.symbolFunc[node.name] = self.func
+        self.funcTable[node.name] = self.func
         entry = self.func.append_basic_block('entry')
         self.builder = ir.IRBuilder(entry)
+
+
+        if node.params:
+            node.params.accept(self)
+            self.symbolTable["t"] = self.paramsTable["t"]
+            self.builder.store(self.func.args[0], self.symbolTable["t"])
+
+
 
         node.decls.accept(self)
         node.stats.accept(self)
@@ -329,7 +386,25 @@ class IRGenerator(Visitor):
             #self.stack.append(self.builder.ret_void())
             self.stack.append(self.builder.ret_void())
 
+    def visit_param(self, node: Param) -> None:
+        if node.type == 'int':
+            variable = self.builder.alloca(intType, name=node.name)
+            self.paramsTable[node.name] = variable
+        elif node.type == 'bool':
+            variable = self.builder.alloca(boolType, name=node.name)
+            self.paramsTable[node.name] = variable
+        elif node.type == 'float':
+            variable = self.builder.alloca(floatType, name=node.name)
+            self.paramsTable[node.name] = variable
+        elif node.type == 'char':
+            variable = self.builder.alloca(charType, name=node.name)
+            self.paramsTable[node.name] = variable
 
+    def visit_params(self, node: Params) -> None:
+        node.param.accept(self)
+        if node.params != None:
+            node.params.accept(self)
+        
     def visit_return_statement(self, node: ReturnStatement) -> None:
         if node.expression: 
             node.expression.accept(self)
@@ -449,7 +524,11 @@ class IRGenerator(Visitor):
         self.stack.append(self.builder.load(self.symbolTable[node.name]))
 
     def visit_function_call(self, node: FunctionCall) -> None:
-        self.stack.append(self.builder.call(self.symbolFunc[node.name], []))
+        args = []
+        if node.param:
+            node.param.accept(self)
+            args.append(self.stack.pop())
+        self.stack.append(self.builder.call(self.funcTable[node.name], args))
 
     def visit_factor(self, node: Factor) -> None: #needs float
 
@@ -487,45 +566,24 @@ class IRGenerator(Visitor):
 module = ir.Module(name="prog")
 
 data =  '''
-        int fact() {
+        int fact(int t) {
             int x;
             int i;
 
             x = 1;
             i = 1;
-            while(i <= 5){
+            while(i <= t){
                 x = x * i;
                 i = i + 1;
             }
             return x;
         }
 
-        void voidFunction() {
-            int x;
-            x = 1;
-            return;
-        }
-
 
         int main() {
-            int x;
             int y;
-            bool t;
-            int i;
 
-            t = 1;
-
-            if (1 == 1 || 1 == 1 )
-                x = 1;
-            else
-                x = 1;
-            x = 1;
-            for(i = 0 ; 1 > 1; i = i + 1;){
-                x = 2;
-                x = 1;
-            }
-
-            y = fact();
+            y = fact(5);
 
             return y;
         }

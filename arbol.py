@@ -4,6 +4,7 @@ from typing import Any
 
 
 
+
 class ASTNode(ABC):
     @abstractmethod
     def accept(self, visitor: Visitor) -> None:
@@ -18,8 +19,9 @@ class Program(ASTNode):
         visitor.visit_program(self)
 
 class Function(ASTNode):
-    def __init__(self, functionReturnType : str, name: str, decls: Any, stats: Any, return_statement: ReturnStatement) -> None:
+    def __init__(self, functionReturnType : str, name: str, params: Params, decls: Any, stats: Any, return_statement: ReturnStatement) -> None:
         self.functionReturnType = functionReturnType
+        self.params = params
         self.name = name
         self.decls = decls
         self.stats = stats
@@ -34,6 +36,22 @@ class ReturnStatement(ASTNode):
 
     def accept(self, visitor: Visitor) -> None:
         visitor.visit_return_statement(self)
+
+class Params(ASTNode):
+    def __init__(self, param : Param, params : Params) -> None:
+        self.params = params
+        self.param = param
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_params(self)
+
+class Param(ASTNode):
+    def __init__(self, type: str, name: str) -> None:
+        self.type = type
+        self.name = name
+
+    def accept(self, visitor: Visitor) -> None:
+        visitor.visit_param(self)
 
 class Literal(ASTNode):
     def __init__(self, value: Any, type: str) -> None:
@@ -52,8 +70,9 @@ class Variable(ASTNode):
         visitor.visit_variable(self)
 
 class FunctionCall(ASTNode):
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, param: Any) -> None:
         self.name = name
+        self.param = param
 
     def accept(self, visitor: Visitor):
         visitor.visit_function_call(self)
