@@ -20,7 +20,7 @@ reserved = {
     'void': 'VOID'
 }
 
-tokens = list(reserved.values()) + ['ID', 'INTLIT', 'LTE', 'GTE', 'EQ', 'NEQ', 'AND', 'OR']
+tokens = list(reserved.values()) + ['ID', 'INTLIT', 'FLOATLIT', 'LTE', 'GTE', 'EQ', 'NEQ', 'AND', 'OR']
 
 t_ignore  = ' \t'
 
@@ -39,6 +39,11 @@ def t_ID(t):
 def t_INTLIT(t):
     r'[0-9]+'
     t.value = int(t.value)
+    return t
+
+def t_FLOATLIT(t):
+    r'((([0-9]+)?\.[0-9]+)|([0-9]))'
+    t.value = float(t.value)
     return t
 
 def t_newline(t):
@@ -277,12 +282,10 @@ def p_Factor(p):
            | UnaryOp Primary
     """
 
-    if len(p) > 2 and p[1] == '-':
-        p[0] = p[2]
-    elif len(p) > 2 and p[1] == '!':
-        p[0] = p[2]
-    else:
+    if len(p) == 2:
         p[0] = p[1]
+    else:
+        p[0] = Factor(p[1], p[2])
 
 def p_UnaryOp(p):
     """
@@ -294,6 +297,10 @@ def p_UnaryOp(p):
 def p_Primary_IntLit(p):
     'Primary : INTLIT'
     p[0] = Literal(p[1], 'INT')
+
+def p_Primary_FloatLit(p):
+    'Primary : FLOATLIT'
+    p[0] = Literal(p[1], 'FLOAT')
 
 def p_Primary_Id(p):
     'Primary : ID'
@@ -531,15 +538,17 @@ class IRGenerator(Visitor):
         self.stack.append(self.builder.call(self.funcTable[node.name], args))
 
     def visit_factor(self, node: Factor) -> None: #needs float
+        node.value.accept(self)
+        value = self.stack.pop()
 
         if node.type == '!':
-            #self.stack.append(self.builder.neg(node.value))
-            pass
+            if node.value.type == 'INT':
+                self.stack.append(self.builder.not_(value))
         elif node.type == '-':
-            pass
-            #self.stack.append(self.builder.neg(node.value))
-        else:
-            pass
+            if node.value.type == 'INT':
+                self.stack.append(self.builder.neg(value))
+            elif node.value.type == 'FLOAT':
+                self.stack.append(self.builder.fneg(value))
 
     def visit_binary_op(self, node: BinaryOp) -> None:
         node.lhs.accept(self)
@@ -575,6 +584,7 @@ data =  '''
         int fact(int t) {
             int x;
             int i;
+            float f;
 
             x = 1;
             i = retNumber(1);
@@ -582,6 +592,7 @@ data =  '''
                 x = x * i;
                 i = i + 1;
             }
+            x = x;
             return x;
         }
 

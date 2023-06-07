@@ -114,7 +114,7 @@ class BinaryOp(ASTNode):
         visitor.visit_binary_op(self)
 
 class Factor(ASTNode):
-    def __init__(self, value: str, type: str) -> None:
+    def __init__(self, type: str, value: str) -> None:
         self.value = value
         self.type = type
 
