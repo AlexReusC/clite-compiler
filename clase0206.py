@@ -353,6 +353,7 @@ class IRGenerator(Visitor):
                 tmp = tmp.params
 
             param_types = [param.type for param in params_objs]
+            params_names = [param.name for param in params_objs]
             for x in param_types:
                 if x == 'int':
                     params.append(intType)
@@ -372,10 +373,9 @@ class IRGenerator(Visitor):
 
         if node.params:
             node.params.accept(self)
-            self.symbolTable["t"] = self.paramsTable["t"]
-            self.builder.store(self.func.args[0], self.symbolTable["t"])
-
-
+            for x in params_names:
+                self.symbolTable[x] = self.paramsTable[x]
+                self.builder.store(self.func.args[0], self.symbolTable[x])
 
         node.decls.accept(self)
         node.stats.accept(self)
@@ -566,12 +566,18 @@ class IRGenerator(Visitor):
 module = ir.Module(name="prog")
 
 data =  '''
+        int retNumber(int t) {
+            int x;
+            x = t;
+           return x;
+        }
+
         int fact(int t) {
             int x;
             int i;
 
             x = 1;
-            i = 1;
+            i = retNumber(1);
             while(i <= t){
                 x = x * i;
                 i = i + 1;
@@ -583,7 +589,7 @@ data =  '''
         int main() {
             int y;
 
-            y = fact(5);
+            y = fact(5) + fact(5);
 
             return y;
         }
