@@ -16,7 +16,8 @@ reserved = {
     'return' : 'RETURN',
     'while' : 'WHILE',
     'for': 'FOR',
-    'return': 'RETURN'
+    'return': 'RETURN',
+    'void': 'VOID'
 }
 
 tokens = list(reserved.values()) + ['ID', 'INTLIT', 'LTE', 'GTE', 'EQ', 'NEQ', 'AND', 'OR']
@@ -62,14 +63,17 @@ def p_Function(p):
     '''
     Function : Type ID '(' ')' '{' Declarations Statements ReturnStatement '}'
     '''
-    p[0] = Function(p[2], p[6], p[7], p[8])
+    p[0] = Function(p[1], p[2], p[6], p[7], p[8])
 
 def p_ReturnStatement(p):
     '''
     ReturnStatement : RETURN Expression ';'
+                    | RETURN ';'
     '''
-    print("p", p[2])
-    p[0] = ReturnStatement(p[2])
+    if len(p) > 3:
+        p[0] = ReturnStatement(p[2])
+    else:
+        p[0] = ReturnStatement(False)
 
 def p_empty(p):
     '''
@@ -97,6 +101,13 @@ def p_Type(p):
          | BOOL
          | FLOAT
          | CHAR
+    '''
+    p[0] = p[1]
+
+def p_FunctionReturnType(p):
+    '''
+    FunctionReturnType : Type
+                       | VOID
     '''
     p[0] = p[1]
 
@@ -308,13 +319,17 @@ class IRGenerator(Visitor):
         node.decls.accept(self)
         node.stats.accept(self)
 
-        node.returnStatement.accept(self)
+        if node.functionReturnType != "VOID":
+            node.returnStatement.accept(self)
+        else:
+            self.builder.ret_void()
 
 
     def visit_return_statement(self, node: ReturnStatement) -> None:
-        node.expression.accept(self)
-        tmp = self.stack.pop()
-        self.builder.ret(tmp)
+        if node.expression: 
+            node.expression.accept(self)
+            tmp = self.stack.pop()
+            self.builder.ret(tmp)
 
 
     def visit_if_else(self, node: IfElse) -> None:
@@ -479,6 +494,7 @@ data =  '''
             }
             return x;
         }
+
 
         int main() {
             int x;

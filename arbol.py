@@ -18,7 +18,8 @@ class Program(ASTNode):
         visitor.visit_program(self)
 
 class Function(ASTNode):
-    def __init__(self, name: str, decls: Any, stats: Any, return_statement: ReturnStatement) -> None:
+    def __init__(self, functionReturnType : str, name: str, decls: Any, stats: Any, return_statement: ReturnStatement) -> None:
+        self.functionReturnType = functionReturnType
         self.name = name
         self.decls = decls
         self.stats = stats
