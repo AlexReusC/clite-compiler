@@ -5,7 +5,7 @@ Grammar
 Rule 0     S' -> Program
 Rule 1     Program -> Function Program
 Rule 2     Program -> empty
-Rule 3     Function -> Type ID ( ) { Declarations Statements ReturnStatement }
+Rule 3     Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement }
 Rule 4     ReturnStatement -> RETURN Expression ;
 Rule 5     ReturnStatement -> RETURN ;
 Rule 6     empty -> <empty>
@@ -113,7 +113,7 @@ Expression           : 4 25 26 27 28 30
 Factor               : 47
 ForStatement         : 21
 Function             : 1
-FunctionReturnType   : 
+FunctionReturnType   : 3
 IfStatement          : 19
 MulOp                : 48
 Primary              : 48 52 53
@@ -124,7 +124,7 @@ ReturnStatement      : 3
 Statement            : 16 25 25 26 27
 Statements           : 3 16 24
 Term                 : 43 44 48
-Type                 : 3 9 14
+Type                 : 9 14
 UnaryOp              : 53
 WhileStatement       : 20
 empty                : 2 8 17
@@ -136,23 +136,27 @@ state 0
     (0) S' -> . Program
     (1) Program -> . Function Program
     (2) Program -> . empty
-    (3) Function -> . Type ID ( ) { Declarations Statements ReturnStatement }
+    (3) Function -> . FunctionReturnType ID ( ) { Declarations Statements ReturnStatement }
     (6) empty -> .
+    (14) FunctionReturnType -> . Type
+    (15) FunctionReturnType -> . VOID
     (10) Type -> . INT
     (11) Type -> . BOOL
     (12) Type -> . FLOAT
     (13) Type -> . CHAR
 
     $end            reduce using rule 6 (empty -> .)
-    INT             shift and go to state 5
-    BOOL            shift and go to state 6
-    FLOAT           shift and go to state 7
-    CHAR            shift and go to state 8
+    VOID            shift and go to state 6
+    INT             shift and go to state 7
+    BOOL            shift and go to state 8
+    FLOAT           shift and go to state 9
+    CHAR            shift and go to state 10
 
     Program                        shift and go to state 1
     Function                       shift and go to state 2
     empty                          shift and go to state 3
-    Type                           shift and go to state 4
+    FunctionReturnType             shift and go to state 4
+    Type                           shift and go to state 5
 
 state 1
 
@@ -165,23 +169,27 @@ state 2
     (1) Program -> Function . Program
     (1) Program -> . Function Program
     (2) Program -> . empty
-    (3) Function -> . Type ID ( ) { Declarations Statements ReturnStatement }
+    (3) Function -> . FunctionReturnType ID ( ) { Declarations Statements ReturnStatement }
     (6) empty -> .
+    (14) FunctionReturnType -> . Type
+    (15) FunctionReturnType -> . VOID
     (10) Type -> . INT
     (11) Type -> . BOOL
     (12) Type -> . FLOAT
     (13) Type -> . CHAR
 
     $end            reduce using rule 6 (empty -> .)
-    INT             shift and go to state 5
-    BOOL            shift and go to state 6
-    FLOAT           shift and go to state 7
-    CHAR            shift and go to state 8
+    VOID            shift and go to state 6
+    INT             shift and go to state 7
+    BOOL            shift and go to state 8
+    FLOAT           shift and go to state 9
+    CHAR            shift and go to state 10
 
     Function                       shift and go to state 2
-    Program                        shift and go to state 9
+    Program                        shift and go to state 11
     empty                          shift and go to state 3
-    Type                           shift and go to state 4
+    FunctionReturnType             shift and go to state 4
+    Type                           shift and go to state 5
 
 state 3
 
@@ -192,70 +200,84 @@ state 3
 
 state 4
 
-    (3) Function -> Type . ID ( ) { Declarations Statements ReturnStatement }
+    (3) Function -> FunctionReturnType . ID ( ) { Declarations Statements ReturnStatement }
 
-    ID              shift and go to state 10
+    ID              shift and go to state 12
 
 
 state 5
+
+    (14) FunctionReturnType -> Type .
+
+    ID              reduce using rule 14 (FunctionReturnType -> Type .)
+
+
+state 6
+
+    (15) FunctionReturnType -> VOID .
+
+    ID              reduce using rule 15 (FunctionReturnType -> VOID .)
+
+
+state 7
 
     (10) Type -> INT .
 
     ID              reduce using rule 10 (Type -> INT .)
 
 
-state 6
+state 8
 
     (11) Type -> BOOL .
 
     ID              reduce using rule 11 (Type -> BOOL .)
 
 
-state 7
+state 9
 
     (12) Type -> FLOAT .
 
     ID              reduce using rule 12 (Type -> FLOAT .)
 
 
-state 8
+state 10
 
     (13) Type -> CHAR .
 
     ID              reduce using rule 13 (Type -> CHAR .)
 
 
-state 9
+state 11
 
     (1) Program -> Function Program .
 
     $end            reduce using rule 1 (Program -> Function Program .)
 
 
-state 10
-
-    (3) Function -> Type ID . ( ) { Declarations Statements ReturnStatement }
-
-    (               shift and go to state 11
-
-
-state 11
-
-    (3) Function -> Type ID ( . ) { Declarations Statements ReturnStatement }
-
-    )               shift and go to state 12
-
-
 state 12
 
-    (3) Function -> Type ID ( ) . { Declarations Statements ReturnStatement }
+    (3) Function -> FunctionReturnType ID . ( ) { Declarations Statements ReturnStatement }
 
-    {               shift and go to state 13
+    (               shift and go to state 13
 
 
 state 13
 
-    (3) Function -> Type ID ( ) { . Declarations Statements ReturnStatement }
+    (3) Function -> FunctionReturnType ID ( . ) { Declarations Statements ReturnStatement }
+
+    )               shift and go to state 14
+
+
+state 14
+
+    (3) Function -> FunctionReturnType ID ( ) . { Declarations Statements ReturnStatement }
+
+    {               shift and go to state 15
+
+
+state 15
+
+    (3) Function -> FunctionReturnType ID ( ) { . Declarations Statements ReturnStatement }
     (7) Declarations -> . Declaration Declarations
     (8) Declarations -> . empty
     (9) Declaration -> . Type ID ;
@@ -272,26 +294,19 @@ state 13
     FOR             reduce using rule 6 (empty -> .)
     {               reduce using rule 6 (empty -> .)
     RETURN          reduce using rule 6 (empty -> .)
-    INT             shift and go to state 5
-    BOOL            shift and go to state 6
-    FLOAT           shift and go to state 7
-    CHAR            shift and go to state 8
+    INT             shift and go to state 7
+    BOOL            shift and go to state 8
+    FLOAT           shift and go to state 9
+    CHAR            shift and go to state 10
 
-    Type                           shift and go to state 14
-    Declarations                   shift and go to state 15
-    Declaration                    shift and go to state 16
-    empty                          shift and go to state 17
+    Declarations                   shift and go to state 16
+    Declaration                    shift and go to state 17
+    empty                          shift and go to state 18
+    Type                           shift and go to state 19
 
-state 14
+state 16
 
-    (9) Declaration -> Type . ID ;
-
-    ID              shift and go to state 18
-
-
-state 15
-
-    (3) Function -> Type ID ( ) { Declarations . Statements ReturnStatement }
+    (3) Function -> FunctionReturnType ID ( ) { Declarations . Statements ReturnStatement }
     (16) Statements -> . Statement Statements
     (17) Statements -> . empty
     (18) Statement -> . Assignment
@@ -307,24 +322,24 @@ state 15
     (27) ForStatement -> . FOR ( Assignment Expression ; Assignment ) Statement
     (24) Block -> . { Statements }
 
-    ;               shift and go to state 28
+    ;               shift and go to state 29
     RETURN          reduce using rule 6 (empty -> .)
-    ID              shift and go to state 19
-    IF              shift and go to state 30
-    WHILE           shift and go to state 31
-    FOR             shift and go to state 32
-    {               shift and go to state 20
+    ID              shift and go to state 20
+    IF              shift and go to state 31
+    WHILE           shift and go to state 32
+    FOR             shift and go to state 33
+    {               shift and go to state 21
 
-    Statements                     shift and go to state 21
-    Statement                      shift and go to state 22
-    empty                          shift and go to state 23
-    Assignment                     shift and go to state 24
-    IfStatement                    shift and go to state 25
-    WhileStatement                 shift and go to state 26
-    ForStatement                   shift and go to state 27
-    Block                          shift and go to state 29
+    Statements                     shift and go to state 22
+    Statement                      shift and go to state 23
+    empty                          shift and go to state 24
+    Assignment                     shift and go to state 25
+    IfStatement                    shift and go to state 26
+    WhileStatement                 shift and go to state 27
+    ForStatement                   shift and go to state 28
+    Block                          shift and go to state 30
 
-state 16
+state 17
 
     (7) Declarations -> Declaration . Declarations
     (7) Declarations -> . Declaration Declarations
@@ -343,17 +358,17 @@ state 16
     FOR             reduce using rule 6 (empty -> .)
     {               reduce using rule 6 (empty -> .)
     RETURN          reduce using rule 6 (empty -> .)
-    INT             shift and go to state 5
-    BOOL            shift and go to state 6
-    FLOAT           shift and go to state 7
-    CHAR            shift and go to state 8
+    INT             shift and go to state 7
+    BOOL            shift and go to state 8
+    FLOAT           shift and go to state 9
+    CHAR            shift and go to state 10
 
-    Declaration                    shift and go to state 16
-    Declarations                   shift and go to state 33
-    empty                          shift and go to state 17
-    Type                           shift and go to state 14
+    Declaration                    shift and go to state 17
+    Declarations                   shift and go to state 34
+    empty                          shift and go to state 18
+    Type                           shift and go to state 19
 
-state 17
+state 18
 
     (8) Declarations -> empty .
 
@@ -366,21 +381,21 @@ state 17
     RETURN          reduce using rule 8 (Declarations -> empty .)
 
 
-state 18
-
-    (9) Declaration -> Type ID . ;
-
-    ;               shift and go to state 34
-
-
 state 19
 
-    (28) Assignment -> ID . = Expression ;
+    (9) Declaration -> Type . ID ;
 
-    =               shift and go to state 35
+    ID              shift and go to state 35
 
 
 state 20
+
+    (28) Assignment -> ID . = Expression ;
+
+    =               shift and go to state 36
+
+
+state 21
 
     (24) Block -> { . Statements }
     (16) Statements -> . Statement Statements
@@ -398,34 +413,34 @@ state 20
     (27) ForStatement -> . FOR ( Assignment Expression ; Assignment ) Statement
     (24) Block -> . { Statements }
 
-    ;               shift and go to state 28
+    ;               shift and go to state 29
     }               reduce using rule 6 (empty -> .)
-    ID              shift and go to state 19
-    IF              shift and go to state 30
-    WHILE           shift and go to state 31
-    FOR             shift and go to state 32
-    {               shift and go to state 20
+    ID              shift and go to state 20
+    IF              shift and go to state 31
+    WHILE           shift and go to state 32
+    FOR             shift and go to state 33
+    {               shift and go to state 21
 
-    Statements                     shift and go to state 36
-    Statement                      shift and go to state 22
-    empty                          shift and go to state 23
-    Assignment                     shift and go to state 24
-    IfStatement                    shift and go to state 25
-    WhileStatement                 shift and go to state 26
-    ForStatement                   shift and go to state 27
-    Block                          shift and go to state 29
+    Statements                     shift and go to state 37
+    Statement                      shift and go to state 23
+    empty                          shift and go to state 24
+    Assignment                     shift and go to state 25
+    IfStatement                    shift and go to state 26
+    WhileStatement                 shift and go to state 27
+    ForStatement                   shift and go to state 28
+    Block                          shift and go to state 30
 
-state 21
+state 22
 
-    (3) Function -> Type ID ( ) { Declarations Statements . ReturnStatement }
+    (3) Function -> FunctionReturnType ID ( ) { Declarations Statements . ReturnStatement }
     (4) ReturnStatement -> . RETURN Expression ;
     (5) ReturnStatement -> . RETURN ;
 
-    RETURN          shift and go to state 38
+    RETURN          shift and go to state 39
 
-    ReturnStatement                shift and go to state 37
+    ReturnStatement                shift and go to state 38
 
-state 22
+state 23
 
     (16) Statements -> Statement . Statements
     (16) Statements -> . Statement Statements
@@ -443,25 +458,25 @@ state 22
     (27) ForStatement -> . FOR ( Assignment Expression ; Assignment ) Statement
     (24) Block -> . { Statements }
 
-    ;               shift and go to state 28
+    ;               shift and go to state 29
     RETURN          reduce using rule 6 (empty -> .)
     }               reduce using rule 6 (empty -> .)
-    ID              shift and go to state 19
-    IF              shift and go to state 30
-    WHILE           shift and go to state 31
-    FOR             shift and go to state 32
-    {               shift and go to state 20
+    ID              shift and go to state 20
+    IF              shift and go to state 31
+    WHILE           shift and go to state 32
+    FOR             shift and go to state 33
+    {               shift and go to state 21
 
-    Statement                      shift and go to state 22
-    Statements                     shift and go to state 39
-    empty                          shift and go to state 23
-    Assignment                     shift and go to state 24
-    IfStatement                    shift and go to state 25
-    WhileStatement                 shift and go to state 26
-    ForStatement                   shift and go to state 27
-    Block                          shift and go to state 29
+    Statement                      shift and go to state 23
+    Statements                     shift and go to state 40
+    empty                          shift and go to state 24
+    Assignment                     shift and go to state 25
+    IfStatement                    shift and go to state 26
+    WhileStatement                 shift and go to state 27
+    ForStatement                   shift and go to state 28
+    Block                          shift and go to state 30
 
-state 23
+state 24
 
     (17) Statements -> empty .
 
@@ -469,7 +484,7 @@ state 23
     }               reduce using rule 17 (Statements -> empty .)
 
 
-state 24
+state 25
 
     (18) Statement -> Assignment .
 
@@ -484,7 +499,7 @@ state 24
     ELSE            reduce using rule 18 (Statement -> Assignment .)
 
 
-state 25
+state 26
 
     (19) Statement -> IfStatement .
 
@@ -499,7 +514,7 @@ state 25
     ELSE            reduce using rule 19 (Statement -> IfStatement .)
 
 
-state 26
+state 27
 
     (20) Statement -> WhileStatement .
 
@@ -514,7 +529,7 @@ state 26
     ELSE            reduce using rule 20 (Statement -> WhileStatement .)
 
 
-state 27
+state 28
 
     (21) Statement -> ForStatement .
 
@@ -529,7 +544,7 @@ state 27
     ELSE            reduce using rule 21 (Statement -> ForStatement .)
 
 
-state 28
+state 29
 
     (22) Statement -> ; .
 
@@ -544,7 +559,7 @@ state 28
     ELSE            reduce using rule 22 (Statement -> ; .)
 
 
-state 29
+state 30
 
     (23) Statement -> Block .
 
@@ -559,28 +574,28 @@ state 29
     ELSE            reduce using rule 23 (Statement -> Block .)
 
 
-state 30
-
-    (25) IfStatement -> IF . ( Expression ) Statement ELSE Statement
-
-    (               shift and go to state 40
-
-
 state 31
 
-    (26) WhileStatement -> WHILE . ( Expression ) Statement
+    (25) IfStatement -> IF . ( Expression ) Statement ELSE Statement
 
     (               shift and go to state 41
 
 
 state 32
 
-    (27) ForStatement -> FOR . ( Assignment Expression ; Assignment ) Statement
+    (26) WhileStatement -> WHILE . ( Expression ) Statement
 
     (               shift and go to state 42
 
 
 state 33
+
+    (27) ForStatement -> FOR . ( Assignment Expression ; Assignment ) Statement
+
+    (               shift and go to state 43
+
+
+state 34
 
     (7) Declarations -> Declaration Declarations .
 
@@ -593,24 +608,14 @@ state 33
     RETURN          reduce using rule 7 (Declarations -> Declaration Declarations .)
 
 
-state 34
-
-    (9) Declaration -> Type ID ; .
-
-    INT             reduce using rule 9 (Declaration -> Type ID ; .)
-    BOOL            reduce using rule 9 (Declaration -> Type ID ; .)
-    FLOAT           reduce using rule 9 (Declaration -> Type ID ; .)
-    CHAR            reduce using rule 9 (Declaration -> Type ID ; .)
-    ;               reduce using rule 9 (Declaration -> Type ID ; .)
-    ID              reduce using rule 9 (Declaration -> Type ID ; .)
-    IF              reduce using rule 9 (Declaration -> Type ID ; .)
-    WHILE           reduce using rule 9 (Declaration -> Type ID ; .)
-    FOR             reduce using rule 9 (Declaration -> Type ID ; .)
-    {               reduce using rule 9 (Declaration -> Type ID ; .)
-    RETURN          reduce using rule 9 (Declaration -> Type ID ; .)
-
-
 state 35
+
+    (9) Declaration -> Type ID . ;
+
+    ;               shift and go to state 44
+
+
+state 36
 
     (28) Assignment -> ID = . Expression ;
     (29) Expression -> . Conjunction
@@ -633,36 +638,36 @@ state 35
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Expression                     shift and go to state 44
-    Conjunction                    shift and go to state 45
-    Equality                       shift and go to state 46
-    Relation                       shift and go to state 47
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
-
-state 36
-
-    (24) Block -> { Statements . }
-
-    }               shift and go to state 56
-
+    Expression                     shift and go to state 46
+    Conjunction                    shift and go to state 47
+    Equality                       shift and go to state 48
+    Relation                       shift and go to state 49
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
 state 37
 
-    (3) Function -> Type ID ( ) { Declarations Statements ReturnStatement . }
+    (24) Block -> { Statements . }
 
-    }               shift and go to state 57
+    }               shift and go to state 58
 
 
 state 38
+
+    (3) Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement . }
+
+    }               shift and go to state 59
+
+
+state 39
 
     (4) ReturnStatement -> RETURN . Expression ;
     (5) ReturnStatement -> RETURN . ;
@@ -686,23 +691,23 @@ state 38
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    ;               shift and go to state 59
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    ;               shift and go to state 61
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Expression                     shift and go to state 58
-    Conjunction                    shift and go to state 45
-    Equality                       shift and go to state 46
-    Relation                       shift and go to state 47
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Expression                     shift and go to state 60
+    Conjunction                    shift and go to state 47
+    Equality                       shift and go to state 48
+    Relation                       shift and go to state 49
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 39
+state 40
 
     (16) Statements -> Statement Statements .
 
@@ -710,7 +715,7 @@ state 39
     }               reduce using rule 16 (Statements -> Statement Statements .)
 
 
-state 40
+state 41
 
     (25) IfStatement -> IF ( . Expression ) Statement ELSE Statement
     (29) Expression -> . Conjunction
@@ -733,22 +738,22 @@ state 40
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Expression                     shift and go to state 60
-    Conjunction                    shift and go to state 45
-    Equality                       shift and go to state 46
-    Relation                       shift and go to state 47
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Expression                     shift and go to state 62
+    Conjunction                    shift and go to state 47
+    Equality                       shift and go to state 48
+    Relation                       shift and go to state 49
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 41
+state 42
 
     (26) WhileStatement -> WHILE ( . Expression ) Statement
     (29) Expression -> . Conjunction
@@ -771,31 +776,48 @@ state 41
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Expression                     shift and go to state 61
-    Conjunction                    shift and go to state 45
-    Equality                       shift and go to state 46
-    Relation                       shift and go to state 47
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Expression                     shift and go to state 63
+    Conjunction                    shift and go to state 47
+    Equality                       shift and go to state 48
+    Relation                       shift and go to state 49
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 42
+state 43
 
     (27) ForStatement -> FOR ( . Assignment Expression ; Assignment ) Statement
     (28) Assignment -> . ID = Expression ;
 
-    ID              shift and go to state 19
+    ID              shift and go to state 20
 
-    Assignment                     shift and go to state 62
+    Assignment                     shift and go to state 64
 
-state 43
+state 44
+
+    (9) Declaration -> Type ID ; .
+
+    INT             reduce using rule 9 (Declaration -> Type ID ; .)
+    BOOL            reduce using rule 9 (Declaration -> Type ID ; .)
+    FLOAT           reduce using rule 9 (Declaration -> Type ID ; .)
+    CHAR            reduce using rule 9 (Declaration -> Type ID ; .)
+    ;               reduce using rule 9 (Declaration -> Type ID ; .)
+    ID              reduce using rule 9 (Declaration -> Type ID ; .)
+    IF              reduce using rule 9 (Declaration -> Type ID ; .)
+    WHILE           reduce using rule 9 (Declaration -> Type ID ; .)
+    FOR             reduce using rule 9 (Declaration -> Type ID ; .)
+    {               reduce using rule 9 (Declaration -> Type ID ; .)
+    RETURN          reduce using rule 9 (Declaration -> Type ID ; .)
+
+
+state 45
 
     (57) Primary -> ID .
     (58) Primary -> ID . ( )
@@ -815,19 +837,19 @@ state 43
     ;               reduce using rule 57 (Primary -> ID .)
     OR              reduce using rule 57 (Primary -> ID .)
     )               reduce using rule 57 (Primary -> ID .)
-    (               shift and go to state 63
+    (               shift and go to state 65
 
 
-state 44
+state 46
 
     (28) Assignment -> ID = Expression . ;
     (30) Expression -> Expression . OR Conjunction
 
-    ;               shift and go to state 64
-    OR              shift and go to state 65
+    ;               shift and go to state 66
+    OR              shift and go to state 67
 
 
-state 45
+state 47
 
     (29) Expression -> Conjunction .
     (32) Conjunction -> Conjunction . AND Equality
@@ -835,10 +857,10 @@ state 45
     ;               reduce using rule 29 (Expression -> Conjunction .)
     OR              reduce using rule 29 (Expression -> Conjunction .)
     )               reduce using rule 29 (Expression -> Conjunction .)
-    AND             shift and go to state 66
+    AND             shift and go to state 68
 
 
-state 46
+state 48
 
     (31) Conjunction -> Equality .
 
@@ -848,7 +870,7 @@ state 46
     )               reduce using rule 31 (Conjunction -> Equality .)
 
 
-state 47
+state 49
 
     (33) Equality -> Relation .
     (34) Equality -> Relation . EquOp Relation
@@ -859,12 +881,12 @@ state 47
     ;               reduce using rule 33 (Equality -> Relation .)
     OR              reduce using rule 33 (Equality -> Relation .)
     )               reduce using rule 33 (Equality -> Relation .)
-    EQ              shift and go to state 68
-    NEQ             shift and go to state 69
+    EQ              shift and go to state 70
+    NEQ             shift and go to state 71
 
-    EquOp                          shift and go to state 67
+    EquOp                          shift and go to state 69
 
-state 48
+state 50
 
     (37) Relation -> Addition .
     (38) Relation -> Addition . RelOp Addition
@@ -882,17 +904,17 @@ state 48
     ;               reduce using rule 37 (Relation -> Addition .)
     OR              reduce using rule 37 (Relation -> Addition .)
     )               reduce using rule 37 (Relation -> Addition .)
-    <               shift and go to state 72
-    LTE             shift and go to state 73
-    >               shift and go to state 74
-    GTE             shift and go to state 75
-    +               shift and go to state 76
-    -               shift and go to state 77
+    <               shift and go to state 74
+    LTE             shift and go to state 75
+    >               shift and go to state 76
+    GTE             shift and go to state 77
+    +               shift and go to state 78
+    -               shift and go to state 79
 
-    RelOp                          shift and go to state 70
-    AddOp                          shift and go to state 71
+    RelOp                          shift and go to state 72
+    AddOp                          shift and go to state 73
 
-state 49
+state 51
 
     (43) Addition -> Term .
     (48) Term -> Term . MulOp Primary
@@ -912,13 +934,13 @@ state 49
     ;               reduce using rule 43 (Addition -> Term .)
     OR              reduce using rule 43 (Addition -> Term .)
     )               reduce using rule 43 (Addition -> Term .)
-    *               shift and go to state 79
-    /               shift and go to state 80
-    %               shift and go to state 81
+    *               shift and go to state 81
+    /               shift and go to state 82
+    %               shift and go to state 83
 
-    MulOp                          shift and go to state 78
+    MulOp                          shift and go to state 80
 
-state 50
+state 52
 
     (47) Term -> Factor .
 
@@ -939,7 +961,7 @@ state 50
     )               reduce using rule 47 (Term -> Factor .)
 
 
-state 51
+state 53
 
     (52) Factor -> Primary .
 
@@ -960,19 +982,19 @@ state 51
     )               reduce using rule 52 (Factor -> Primary .)
 
 
-state 52
+state 54
 
     (53) Factor -> UnaryOp . Primary
     (56) Primary -> . INTLIT
     (57) Primary -> . ID
     (58) Primary -> . ID ( )
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
 
-    Primary                        shift and go to state 82
+    Primary                        shift and go to state 84
 
-state 53
+state 55
 
     (56) Primary -> INTLIT .
 
@@ -993,7 +1015,7 @@ state 53
     )               reduce using rule 56 (Primary -> INTLIT .)
 
 
-state 54
+state 56
 
     (54) UnaryOp -> - .
 
@@ -1001,7 +1023,7 @@ state 54
     ID              reduce using rule 54 (UnaryOp -> - .)
 
 
-state 55
+state 57
 
     (55) UnaryOp -> ! .
 
@@ -1009,7 +1031,7 @@ state 55
     ID              reduce using rule 55 (UnaryOp -> ! .)
 
 
-state 56
+state 58
 
     (24) Block -> { Statements } .
 
@@ -1024,52 +1046,53 @@ state 56
     ELSE            reduce using rule 24 (Block -> { Statements } .)
 
 
-state 57
+state 59
 
-    (3) Function -> Type ID ( ) { Declarations Statements ReturnStatement } .
+    (3) Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement } .
 
-    INT             reduce using rule 3 (Function -> Type ID ( ) { Declarations Statements ReturnStatement } .)
-    BOOL            reduce using rule 3 (Function -> Type ID ( ) { Declarations Statements ReturnStatement } .)
-    FLOAT           reduce using rule 3 (Function -> Type ID ( ) { Declarations Statements ReturnStatement } .)
-    CHAR            reduce using rule 3 (Function -> Type ID ( ) { Declarations Statements ReturnStatement } .)
-    $end            reduce using rule 3 (Function -> Type ID ( ) { Declarations Statements ReturnStatement } .)
+    VOID            reduce using rule 3 (Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement } .)
+    INT             reduce using rule 3 (Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement } .)
+    BOOL            reduce using rule 3 (Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement } .)
+    FLOAT           reduce using rule 3 (Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement } .)
+    CHAR            reduce using rule 3 (Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement } .)
+    $end            reduce using rule 3 (Function -> FunctionReturnType ID ( ) { Declarations Statements ReturnStatement } .)
 
 
-state 58
+state 60
 
     (4) ReturnStatement -> RETURN Expression . ;
     (30) Expression -> Expression . OR Conjunction
 
-    ;               shift and go to state 83
-    OR              shift and go to state 65
+    ;               shift and go to state 85
+    OR              shift and go to state 67
 
 
-state 59
+state 61
 
     (5) ReturnStatement -> RETURN ; .
 
     }               reduce using rule 5 (ReturnStatement -> RETURN ; .)
 
 
-state 60
+state 62
 
     (25) IfStatement -> IF ( Expression . ) Statement ELSE Statement
     (30) Expression -> Expression . OR Conjunction
 
-    )               shift and go to state 84
-    OR              shift and go to state 65
+    )               shift and go to state 86
+    OR              shift and go to state 67
 
 
-state 61
+state 63
 
     (26) WhileStatement -> WHILE ( Expression . ) Statement
     (30) Expression -> Expression . OR Conjunction
 
-    )               shift and go to state 85
-    OR              shift and go to state 65
+    )               shift and go to state 87
+    OR              shift and go to state 67
 
 
-state 62
+state 64
 
     (27) ForStatement -> FOR ( Assignment . Expression ; Assignment ) Statement
     (29) Expression -> . Conjunction
@@ -1092,29 +1115,29 @@ state 62
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Expression                     shift and go to state 86
-    Conjunction                    shift and go to state 45
-    Equality                       shift and go to state 46
-    Relation                       shift and go to state 47
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Expression                     shift and go to state 88
+    Conjunction                    shift and go to state 47
+    Equality                       shift and go to state 48
+    Relation                       shift and go to state 49
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 63
+state 65
 
     (58) Primary -> ID ( . )
 
-    )               shift and go to state 87
+    )               shift and go to state 89
 
 
-state 64
+state 66
 
     (28) Assignment -> ID = Expression ; .
 
@@ -1133,7 +1156,7 @@ state 64
     )               reduce using rule 28 (Assignment -> ID = Expression ; .)
 
 
-state 65
+state 67
 
     (30) Expression -> Expression OR . Conjunction
     (31) Conjunction -> . Equality
@@ -1154,21 +1177,21 @@ state 65
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Conjunction                    shift and go to state 88
-    Equality                       shift and go to state 46
-    Relation                       shift and go to state 47
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Conjunction                    shift and go to state 90
+    Equality                       shift and go to state 48
+    Relation                       shift and go to state 49
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 66
+state 68
 
     (32) Conjunction -> Conjunction AND . Equality
     (33) Equality -> . Relation
@@ -1187,20 +1210,20 @@ state 66
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Equality                       shift and go to state 89
-    Relation                       shift and go to state 47
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Equality                       shift and go to state 91
+    Relation                       shift and go to state 49
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 67
+state 69
 
     (34) Equality -> Relation EquOp . Relation
     (37) Relation -> . Addition
@@ -1217,19 +1240,19 @@ state 67
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Relation                       shift and go to state 90
-    Addition                       shift and go to state 48
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Relation                       shift and go to state 92
+    Addition                       shift and go to state 50
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 68
+state 70
 
     (35) EquOp -> EQ .
 
@@ -1239,7 +1262,7 @@ state 68
     !               reduce using rule 35 (EquOp -> EQ .)
 
 
-state 69
+state 71
 
     (36) EquOp -> NEQ .
 
@@ -1249,7 +1272,7 @@ state 69
     !               reduce using rule 36 (EquOp -> NEQ .)
 
 
-state 70
+state 72
 
     (38) Relation -> Addition RelOp . Addition
     (43) Addition -> . Term
@@ -1264,18 +1287,18 @@ state 70
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Addition                       shift and go to state 91
-    Term                           shift and go to state 49
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Addition                       shift and go to state 93
+    Term                           shift and go to state 51
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 71
+state 73
 
     (44) Addition -> Addition AddOp . Term
     (47) Term -> . Factor
@@ -1288,17 +1311,17 @@ state 71
     (54) UnaryOp -> . -
     (55) UnaryOp -> . !
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
-    -               shift and go to state 54
-    !               shift and go to state 55
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
+    -               shift and go to state 56
+    !               shift and go to state 57
 
-    Term                           shift and go to state 92
-    Factor                         shift and go to state 50
-    Primary                        shift and go to state 51
-    UnaryOp                        shift and go to state 52
+    Term                           shift and go to state 94
+    Factor                         shift and go to state 52
+    Primary                        shift and go to state 53
+    UnaryOp                        shift and go to state 54
 
-state 72
+state 74
 
     (39) RelOp -> < .
 
@@ -1308,7 +1331,7 @@ state 72
     !               reduce using rule 39 (RelOp -> < .)
 
 
-state 73
+state 75
 
     (40) RelOp -> LTE .
 
@@ -1318,7 +1341,7 @@ state 73
     !               reduce using rule 40 (RelOp -> LTE .)
 
 
-state 74
+state 76
 
     (41) RelOp -> > .
 
@@ -1328,7 +1351,7 @@ state 74
     !               reduce using rule 41 (RelOp -> > .)
 
 
-state 75
+state 77
 
     (42) RelOp -> GTE .
 
@@ -1338,7 +1361,7 @@ state 75
     !               reduce using rule 42 (RelOp -> GTE .)
 
 
-state 76
+state 78
 
     (45) AddOp -> + .
 
@@ -1348,7 +1371,7 @@ state 76
     !               reduce using rule 45 (AddOp -> + .)
 
 
-state 77
+state 79
 
     (46) AddOp -> - .
 
@@ -1358,19 +1381,19 @@ state 77
     !               reduce using rule 46 (AddOp -> - .)
 
 
-state 78
+state 80
 
     (48) Term -> Term MulOp . Primary
     (56) Primary -> . INTLIT
     (57) Primary -> . ID
     (58) Primary -> . ID ( )
 
-    INTLIT          shift and go to state 53
-    ID              shift and go to state 43
+    INTLIT          shift and go to state 55
+    ID              shift and go to state 45
 
-    Primary                        shift and go to state 93
+    Primary                        shift and go to state 95
 
-state 79
+state 81
 
     (49) MulOp -> * .
 
@@ -1378,7 +1401,7 @@ state 79
     ID              reduce using rule 49 (MulOp -> * .)
 
 
-state 80
+state 82
 
     (50) MulOp -> / .
 
@@ -1386,7 +1409,7 @@ state 80
     ID              reduce using rule 50 (MulOp -> / .)
 
 
-state 81
+state 83
 
     (51) MulOp -> % .
 
@@ -1394,7 +1417,7 @@ state 81
     ID              reduce using rule 51 (MulOp -> % .)
 
 
-state 82
+state 84
 
     (53) Factor -> UnaryOp Primary .
 
@@ -1415,14 +1438,14 @@ state 82
     )               reduce using rule 53 (Factor -> UnaryOp Primary .)
 
 
-state 83
+state 85
 
     (4) ReturnStatement -> RETURN Expression ; .
 
     }               reduce using rule 4 (ReturnStatement -> RETURN Expression ; .)
 
 
-state 84
+state 86
 
     (25) IfStatement -> IF ( Expression ) . Statement ELSE Statement
     (18) Statement -> . Assignment
@@ -1437,21 +1460,21 @@ state 84
     (27) ForStatement -> . FOR ( Assignment Expression ; Assignment ) Statement
     (24) Block -> . { Statements }
 
-    ;               shift and go to state 28
-    ID              shift and go to state 19
-    IF              shift and go to state 30
-    WHILE           shift and go to state 31
-    FOR             shift and go to state 32
-    {               shift and go to state 20
+    ;               shift and go to state 29
+    ID              shift and go to state 20
+    IF              shift and go to state 31
+    WHILE           shift and go to state 32
+    FOR             shift and go to state 33
+    {               shift and go to state 21
 
-    Statement                      shift and go to state 94
-    Assignment                     shift and go to state 24
-    IfStatement                    shift and go to state 25
-    WhileStatement                 shift and go to state 26
-    ForStatement                   shift and go to state 27
-    Block                          shift and go to state 29
+    Statement                      shift and go to state 96
+    Assignment                     shift and go to state 25
+    IfStatement                    shift and go to state 26
+    WhileStatement                 shift and go to state 27
+    ForStatement                   shift and go to state 28
+    Block                          shift and go to state 30
 
-state 85
+state 87
 
     (26) WhileStatement -> WHILE ( Expression ) . Statement
     (18) Statement -> . Assignment
@@ -1466,30 +1489,30 @@ state 85
     (27) ForStatement -> . FOR ( Assignment Expression ; Assignment ) Statement
     (24) Block -> . { Statements }
 
-    ;               shift and go to state 28
-    ID              shift and go to state 19
-    IF              shift and go to state 30
-    WHILE           shift and go to state 31
-    FOR             shift and go to state 32
-    {               shift and go to state 20
+    ;               shift and go to state 29
+    ID              shift and go to state 20
+    IF              shift and go to state 31
+    WHILE           shift and go to state 32
+    FOR             shift and go to state 33
+    {               shift and go to state 21
 
-    Statement                      shift and go to state 95
-    Assignment                     shift and go to state 24
-    IfStatement                    shift and go to state 25
-    WhileStatement                 shift and go to state 26
-    ForStatement                   shift and go to state 27
-    Block                          shift and go to state 29
+    Statement                      shift and go to state 97
+    Assignment                     shift and go to state 25
+    IfStatement                    shift and go to state 26
+    WhileStatement                 shift and go to state 27
+    ForStatement                   shift and go to state 28
+    Block                          shift and go to state 30
 
-state 86
+state 88
 
     (27) ForStatement -> FOR ( Assignment Expression . ; Assignment ) Statement
     (30) Expression -> Expression . OR Conjunction
 
-    ;               shift and go to state 96
-    OR              shift and go to state 65
+    ;               shift and go to state 98
+    OR              shift and go to state 67
 
 
-state 87
+state 89
 
     (58) Primary -> ID ( ) .
 
@@ -1510,7 +1533,7 @@ state 87
     )               reduce using rule 58 (Primary -> ID ( ) .)
 
 
-state 88
+state 90
 
     (30) Expression -> Expression OR Conjunction .
     (32) Conjunction -> Conjunction . AND Equality
@@ -1518,10 +1541,10 @@ state 88
     ;               reduce using rule 30 (Expression -> Expression OR Conjunction .)
     OR              reduce using rule 30 (Expression -> Expression OR Conjunction .)
     )               reduce using rule 30 (Expression -> Expression OR Conjunction .)
-    AND             shift and go to state 66
+    AND             shift and go to state 68
 
 
-state 89
+state 91
 
     (32) Conjunction -> Conjunction AND Equality .
 
@@ -1531,7 +1554,7 @@ state 89
     )               reduce using rule 32 (Conjunction -> Conjunction AND Equality .)
 
 
-state 90
+state 92
 
     (34) Equality -> Relation EquOp Relation .
 
@@ -1541,7 +1564,7 @@ state 90
     )               reduce using rule 34 (Equality -> Relation EquOp Relation .)
 
 
-state 91
+state 93
 
     (38) Relation -> Addition RelOp Addition .
     (44) Addition -> Addition . AddOp Term
@@ -1554,12 +1577,12 @@ state 91
     ;               reduce using rule 38 (Relation -> Addition RelOp Addition .)
     OR              reduce using rule 38 (Relation -> Addition RelOp Addition .)
     )               reduce using rule 38 (Relation -> Addition RelOp Addition .)
-    +               shift and go to state 76
-    -               shift and go to state 77
+    +               shift and go to state 78
+    -               shift and go to state 79
 
-    AddOp                          shift and go to state 71
+    AddOp                          shift and go to state 73
 
-state 92
+state 94
 
     (44) Addition -> Addition AddOp Term .
     (48) Term -> Term . MulOp Primary
@@ -1579,13 +1602,13 @@ state 92
     ;               reduce using rule 44 (Addition -> Addition AddOp Term .)
     OR              reduce using rule 44 (Addition -> Addition AddOp Term .)
     )               reduce using rule 44 (Addition -> Addition AddOp Term .)
-    *               shift and go to state 79
-    /               shift and go to state 80
-    %               shift and go to state 81
+    *               shift and go to state 81
+    /               shift and go to state 82
+    %               shift and go to state 83
 
-    MulOp                          shift and go to state 78
+    MulOp                          shift and go to state 80
 
-state 93
+state 95
 
     (48) Term -> Term MulOp Primary .
 
@@ -1606,14 +1629,14 @@ state 93
     )               reduce using rule 48 (Term -> Term MulOp Primary .)
 
 
-state 94
+state 96
 
     (25) IfStatement -> IF ( Expression ) Statement . ELSE Statement
 
-    ELSE            shift and go to state 97
+    ELSE            shift and go to state 99
 
 
-state 95
+state 97
 
     (26) WhileStatement -> WHILE ( Expression ) Statement .
 
@@ -1628,16 +1651,16 @@ state 95
     ELSE            reduce using rule 26 (WhileStatement -> WHILE ( Expression ) Statement .)
 
 
-state 96
+state 98
 
     (27) ForStatement -> FOR ( Assignment Expression ; . Assignment ) Statement
     (28) Assignment -> . ID = Expression ;
 
-    ID              shift and go to state 19
+    ID              shift and go to state 20
 
-    Assignment                     shift and go to state 98
+    Assignment                     shift and go to state 100
 
-state 97
+state 99
 
     (25) IfStatement -> IF ( Expression ) Statement ELSE . Statement
     (18) Statement -> . Assignment
@@ -1652,28 +1675,28 @@ state 97
     (27) ForStatement -> . FOR ( Assignment Expression ; Assignment ) Statement
     (24) Block -> . { Statements }
 
-    ;               shift and go to state 28
-    ID              shift and go to state 19
-    IF              shift and go to state 30
-    WHILE           shift and go to state 31
-    FOR             shift and go to state 32
-    {               shift and go to state 20
+    ;               shift and go to state 29
+    ID              shift and go to state 20
+    IF              shift and go to state 31
+    WHILE           shift and go to state 32
+    FOR             shift and go to state 33
+    {               shift and go to state 21
 
-    Statement                      shift and go to state 99
-    Assignment                     shift and go to state 24
-    IfStatement                    shift and go to state 25
-    WhileStatement                 shift and go to state 26
-    ForStatement                   shift and go to state 27
-    Block                          shift and go to state 29
+    Statement                      shift and go to state 101
+    Assignment                     shift and go to state 25
+    IfStatement                    shift and go to state 26
+    WhileStatement                 shift and go to state 27
+    ForStatement                   shift and go to state 28
+    Block                          shift and go to state 30
 
-state 98
+state 100
 
     (27) ForStatement -> FOR ( Assignment Expression ; Assignment . ) Statement
 
-    )               shift and go to state 100
+    )               shift and go to state 102
 
 
-state 99
+state 101
 
     (25) IfStatement -> IF ( Expression ) Statement ELSE Statement .
 
@@ -1688,7 +1711,7 @@ state 99
     ELSE            reduce using rule 25 (IfStatement -> IF ( Expression ) Statement ELSE Statement .)
 
 
-state 100
+state 102
 
     (27) ForStatement -> FOR ( Assignment Expression ; Assignment ) . Statement
     (18) Statement -> . Assignment
@@ -1703,21 +1726,21 @@ state 100
     (27) ForStatement -> . FOR ( Assignment Expression ; Assignment ) Statement
     (24) Block -> . { Statements }
 
-    ;               shift and go to state 28
-    ID              shift and go to state 19
-    IF              shift and go to state 30
-    WHILE           shift and go to state 31
-    FOR             shift and go to state 32
-    {               shift and go to state 20
+    ;               shift and go to state 29
+    ID              shift and go to state 20
+    IF              shift and go to state 31
+    WHILE           shift and go to state 32
+    FOR             shift and go to state 33
+    {               shift and go to state 21
 
-    Assignment                     shift and go to state 24
-    Statement                      shift and go to state 101
-    IfStatement                    shift and go to state 25
-    WhileStatement                 shift and go to state 26
-    ForStatement                   shift and go to state 27
-    Block                          shift and go to state 29
+    Assignment                     shift and go to state 25
+    Statement                      shift and go to state 103
+    IfStatement                    shift and go to state 26
+    WhileStatement                 shift and go to state 27
+    ForStatement                   shift and go to state 28
+    Block                          shift and go to state 30
 
-state 101
+state 103
 
     (27) ForStatement -> FOR ( Assignment Expression ; Assignment ) Statement .
 

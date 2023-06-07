@@ -61,7 +61,7 @@ def p_Program(p):
 
 def p_Function(p):
     '''
-    Function : Type ID '(' ')' '{' Declarations Statements ReturnStatement '}'
+    Function : FunctionReturnType ID '(' ')' '{' Declarations Statements ReturnStatement '}'
     '''
     p[0] = Function(p[1], p[2], p[6], p[7], p[8])
 
@@ -259,13 +259,10 @@ def p_Factor(p):
     #print("p", p[1], p[2])
 
     if len(p) > 2 and p[1] == '-':
-        #p[2].value = -p[2].value
         p[0] = p[2]
     elif len(p) > 2 and p[1] == '!':
-        #p[0] = Factor(p[2], p[1])
         p[0] = p[2]
     else:
-        #p[0] = Factor(p[1], "")
         p[0] = p[1]
 
 def p_UnaryOp(p):
@@ -294,6 +291,7 @@ intType = ir.IntType(32)
 boolType = ir.IntType(32)
 floatType = ir.FloatType()
 charType = ir.IntType(32)
+voidType = ir.VoidType()
 
 class IRGenerator(Visitor):
     def __init__(self, module):
@@ -310,7 +308,13 @@ class IRGenerator(Visitor):
             node.program.accept(self)
 
     def visit_function(self, node: Function) -> None:
-        fnty = ir.FunctionType(intType, [])
+        return_type = None
+        if node.functionReturnType == "int":
+            return_type = intType
+        else:
+            return_type = voidType 
+
+        fnty = ir.FunctionType(return_type, [])
         self.func = ir.Function(self.module, fnty, name=node.name)
         self.symbolFunc[node.name] = self.func
         entry = self.func.append_basic_block('entry')
@@ -319,10 +323,11 @@ class IRGenerator(Visitor):
         node.decls.accept(self)
         node.stats.accept(self)
 
-        if node.functionReturnType != "VOID":
+        if node.functionReturnType != "void":
             node.returnStatement.accept(self)
         else:
-            self.builder.ret_void()
+            #self.stack.append(self.builder.ret_void())
+            self.stack.append(self.builder.ret_void())
 
 
     def visit_return_statement(self, node: ReturnStatement) -> None:
@@ -493,6 +498,12 @@ data =  '''
                 i = i + 1;
             }
             return x;
+        }
+
+        void voidFunction() {
+            int x;
+            x = 1;
+            return;
         }
 
 
