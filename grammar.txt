@@ -1,0 +1,6 @@
+checar tipo rhs y lhs
+sitofp = convertir de entero a float
+reporte = qué podemos hacer (ejemplo), lo que dejamos afuera y por qué, reflexion individual
+
+presentacion = mock up de qué hicimos en la comparación de programas y qué se puede hacer
+en un futuro con una interfaz amigable al usuario 

@@ -36,14 +36,14 @@ def t_ID(t):
      t.type = reserved.get(t.value,'ID')    # Check for reserved words
      return t
 
+def t_FLOATLIT(t):
+    r'((([0-9]+)?\.[0-9]+)|([0-9]+\.))'
+    t.value = float(t.value)
+    return t
+
 def t_INTLIT(t):
     r'[0-9]+'
     t.value = int(t.value)
-    return t
-
-def t_FLOATLIT(t):
-    r'((([0-9]+)?\.[0-9]+)|([0-9]))'
-    t.value = float(t.value)
     return t
 
 def t_newline(t):
@@ -304,6 +304,7 @@ def p_Primary_FloatLit(p):
 
 def p_Primary_Id(p):
     'Primary : ID'
+    print(p[1])
     p[0] = Variable(p[1], 'INT')
 
 def p_Primary_FunctionCall(p):
@@ -525,7 +526,10 @@ class IRGenerator(Visitor):
         self.builder.store(rhs, self.symbolTable[node.lhs])
 
     def visit_literal(self, node: Literal) -> None:
-        self.stack.append(intType(node.value))
+        if node.type == "INT":
+            self.stack.append(intType(node.value))
+        elif node.type == "FLOAT":
+            self.stack.append(floatType(node.value))
     
     def visit_variable(self, node: Variable) -> None:
         self.stack.append(self.builder.load(self.symbolTable[node.name]))
@@ -555,14 +559,43 @@ class IRGenerator(Visitor):
         node.rhs.accept(self)
         rhs = self.stack.pop()
         lhs = self.stack.pop()
+
+        rhs_type = rhs.type
+        lhs_type = lhs.type
+
+        if isinstance(lhs_type, ir.FloatType) or isinstance(rhs_type, ir.FloatType):
+            if isinstance(lhs_type, ir.IntType):
+                self.stack.append(self.builder.sitofp(lhs, floatType))                     
+                lhs = self.stack.pop()
+            if isinstance(rhs_type, ir.IntType):
+                self.stack.append(self.builder.sitofp(rhs, floatType))
+                rhs = self.stack.pop()
+
         if node.op == '+':
-            self.stack.append(self.builder.add(lhs, rhs))
+            if isinstance(lhs_type, ir.IntType) and isinstance(rhs_type, ir.IntType):
+                self.stack.append(self.builder.add(lhs, rhs))
+            elif isinstance(lhs_type, ir.FloatType) or isinstance(rhs_type, ir.FloatType):
+                self.stack.append(self.builder.fadd(lhs, rhs))
         elif node.op == '-':
-            self.stack.append(self.builder.sub(lhs, rhs))
+            if isinstance(lhs_type, ir.IntType) and isinstance(rhs_type, ir.IntType):
+                self.stack.append(self.builder.sub(lhs, rhs))
+            elif isinstance(lhs_type, ir.FloatType) and isinstance(rhs_type, ir.FloatType):
+                self.stack.append(self.builder.fsub(lhs, rhs))
         elif node.op == '*':
-            self.stack.append(self.builder.mul(lhs, rhs))
+            if isinstance(lhs_type, ir.IntType) and isinstance(rhs_type, ir.IntType):
+                self.stack.append(self.builder.mul(lhs, rhs))
+            elif isinstance(lhs_type, ir.FloatType) and isinstance(rhs_type, ir.FloatType):
+                self.stack.append(self.builder.fmul(lhs, rhs))
+        elif node.op == '/':
+            if isinstance(lhs_type, ir.IntType) and isinstance(rhs_type, ir.IntType):
+                self.stack.append(self.builder.sdiv(lhs, rhs))
+            elif isinstance(lhs_type, ir.FloatType) and isinstance(rhs_type, ir.FloatType):
+                self.stack.append(self.builder.fdiv(lhs, rhs))
         elif node.op == '%':
-            self.stack.append(self.builder.srem(lhs, rhs))
+            if isinstance(lhs_type, ir.IntType) and isinstance(rhs_type, ir.IntType):
+                self.stack.append(self.builder.srem(lhs, rhs))
+            elif isinstance(lhs_type, ir.FloatType) and isinstance(rhs_type, ir.FloatType):
+                self.stack.append(self.builder.frem(lhs, rhs))
         elif node.op in ['<', '>', '>=', '<=', '==', '!=']:
             self.stack.append(
                     self.builder.icmp_signed(node.op, lhs, rhs),
@@ -572,35 +605,15 @@ class IRGenerator(Visitor):
         elif node.op == '||':
             self.stack.append(self.builder.or_(lhs, rhs))
 
+
+
 module = ir.Module(name="prog")
 
 data =  '''
-        int retNumber(int t) {
-            int x;
-            x = t;
-           return x;
-        }
+        float main() {
+            float y;
 
-        int fact(int t) {
-            int x;
-            int i;
-            float f;
-
-            x = 1;
-            i = retNumber(1);
-            while(i <= t){
-                x = x * i;
-                i = i + 1;
-            }
-            x = x;
-            return x;
-        }
-
-
-        int main() {
-            int y;
-
-            y = fact(5) + fact(5);
+            y = 1.2 + 1;
 
             return y;
         }
@@ -619,13 +632,14 @@ print(module)
 
 
 import runtime as rt
-from ctypes import CFUNCTYPE, c_int
+from ctypes import CFUNCTYPE, c_int, c_float
 
 engine = rt.create_execution_engine()
 mod = rt.compile_ir(engine, str(module))
 func_ptr = engine.get_function_address("main")
 
-cfunc = CFUNCTYPE(c_int)(func_ptr)
+#change this for return type
+cfunc = CFUNCTYPE(c_float)(func_ptr)
 res = cfunc()
 print(res)
 
